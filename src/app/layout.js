@@ -3,6 +3,8 @@ import "./globals.css";
 import TicketLagbeNavbar from "@/components/navbar/navbar";
 import ThemeProvider from "./providers/ThemeProvider";
 import TicketLagbeFooter from "@/components/footer/footer";
+import { DotBackgroundDemo } from "@/components/dotbg";
+import SplashScreen from "@/components/SplashScreen";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,8 +33,10 @@ export default function RootLayout({ children }) {
             <TicketLagbeNavbar />
           </nav>
           <main>
+            <SplashScreen />
             {children}
           </main>
+          {/* <DotBackgroundDemo /> */}
           <TicketLagbeFooter />
         </ThemeProvider>
       </body>

@@ -2,25 +2,27 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import { Bus, Ticket, ChevronDown, Menu, X, User, LogOut, Sun, Moon, TrainFront } from "lucide-react";
+// import { getSession, router, signOut } from "better-auth/api";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { signOut, useSession } from "@/lib/auth-client";
 
-/**
- * TicketLagbe — primary site navbar, built with Tailwind utility classes.
- * Dark mode is toggled by adding/removing the `dark` class on the root
- * wrapper (no localStorage — state lives in React per artifact constraints).
- *
- * Usage:  <TicketLagbeNavbar isLoggedIn={true} user={{ name: "Arif Hossain" }} />
- */
 
-const NAV_LINKS = [
-  { label: "Home", href: "#home" },
+
+
+export default function TicketLagbeNavbar() {
+  const {data,isPending} = useSession()
+  const user = data?.user;
+
+  const NAV_LINKS = [
+  { label: "Home", href: "/" },
   { label: "All Tickets", href: "/tickets" },
-  { label: "Dashboard", href: "/dashboard"},
+  { label: "Dashboard", href: `${user?.role === 'user' ? '/dashboard/user':(user?.role === 'vendor' ? '/dashboard/vendor':(user?.role === 'admin'&&'/dashboard/admin'))}`},
 ];
 
-export default function TicketLagbeNavbar({
-  isLoggedIn = false,
-  user = { name: "Arif Hossain" },
-}) {
+  const router = useRouter();
+  
+  
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -42,10 +44,10 @@ export default function TicketLagbeNavbar({
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
-  const visibleLinks = NAV_LINKS.filter((l) => !l.private || isLoggedIn);
+  
 
   return (
-    <div className="bg-stone-50 dark:bg-neutral-950 transition-colors">
+    <div className="bg-stone-50 fixed z-100 w-full dark:bg-neutral-950 transition-colors">
         <header
           className={[
             "sticky top-0 z-50 border-b transition-colors",
@@ -85,14 +87,14 @@ export default function TicketLagbeNavbar({
 
             {/* Desktop links */}
             <ul className="hidden md:flex items-center gap-1 flex-1 justify-center">
-              {visibleLinks.map((link) => (
+              {NAV_LINKS.map((link) => (
                 <li key={link.label}>
-                  <a
+                  <Link
                     href={link.href}
                     className="block px-3.5 py-2 rounded-lg text-sm font-medium text-stone-500 dark:text-stone-400 hover:bg-orange-50 dark:hover:bg-orange-500/10 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -102,7 +104,7 @@ export default function TicketLagbeNavbar({
               <ThemeToggle />
 
               <div className="hidden md:block">
-                {isLoggedIn ? (
+                {user ? (
                   <div ref={profileRef} className="relative">
                     <button
                       onClick={() => setProfileOpen((o) => !o)}
@@ -124,16 +126,22 @@ export default function TicketLagbeNavbar({
                     {profileOpen && (
                       <div className="absolute right-0 top-[calc(100%+8px)] min-w-[170px] bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-xl shadow-lg p-1.5">
                         <DropdownItem icon={User} label="My Profile" />
-                        <DropdownItem icon={LogOut} label="Logout" danger />
+                        <DropdownItem icon={LogOut} label="Logout" danger fun={async()=>{
+                          await signOut()
+                        }}/>
                       </div>
                     )}
                   </div>
                 ) : (
                   <div className="flex gap-2">
-                    <button className="px-4 py-2 rounded-lg border border-stone-200 dark:border-neutral-700 text-stone-900 dark:text-stone-50 text-sm font-medium hover:bg-stone-50 dark:hover:bg-neutral-900 transition-colors">
+                    <button onClick={() => {
+                      router.push('/login')
+                    }} className="px-4 py-2 rounded-lg border border-stone-200 dark:border-neutral-700 text-stone-900 dark:text-stone-50 text-sm font-medium hover:bg-stone-50 dark:hover:bg-neutral-900 transition-colors">
                       Login
                     </button>
-                    <button className="px-4 py-2 rounded-lg bg-orange-600 dark:bg-orange-500 text-orange-50 text-sm font-semibold hover:bg-orange-700 dark:hover:bg-orange-600 transition-colors">
+                    <button onClick={() => {
+                      router.push('/signup')
+                    }} className="px-4 py-2 rounded-lg bg-orange-600 dark:bg-orange-500 text-orange-50 text-sm font-semibold hover:bg-orange-700 dark:hover:bg-orange-600 transition-colors">
                       Register
                     </button>
                   </div>
@@ -154,18 +162,18 @@ export default function TicketLagbeNavbar({
           {/* Mobile panel */}
           {mobileOpen && (
             <div className="md:hidden border-t border-stone-200 dark:border-neutral-800 px-5 pt-3 pb-4 bg-white dark:bg-neutral-950">
-              {visibleLinks.map((link) => (
-                <a
+              {NAV_LINKS.map((link) => (
+                <Link
                   key={link.label}
                   href={link.href}
                   className="block py-2.5 border-b border-stone-100 dark:border-neutral-800 text-stone-900 dark:text-stone-50 text-[15px] font-medium"
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
 
               <div className="mt-3.5">
-                {isLoggedIn ? (
+                {user ? (
                   <div className="flex items-center gap-2.5">
                     <span className="w-8 h-8 rounded-full bg-orange-600 dark:bg-orange-500 text-orange-50 flex items-center justify-center text-sm font-bold">
                       {user.name.charAt(0)}
@@ -174,17 +182,23 @@ export default function TicketLagbeNavbar({
                       <div className="text-sm font-semibold text-stone-900 dark:text-stone-50">
                         {user.name}
                       </div>
-                      <div className="text-xs text-orange-600 dark:text-orange-400 cursor-pointer">
+                      <button onClick={() => {
+                        signOut()
+                      }} className="text-xs text-orange-600 dark:text-orange-400 cursor-pointer">
                         Logout
-                      </div>
+                      </button>
                     </div>
                   </div>
                 ) : (
                   <div className="flex gap-2">
-                    <button className="flex-1 py-2.5 rounded-lg border border-stone-200 dark:border-neutral-700 text-stone-900 dark:text-stone-50 text-sm font-medium">
+                    <button className="flex-1 py-2.5 rounded-lg border border-stone-200 dark:border-neutral-700 text-stone-900 dark:text-stone-50 text-sm font-medium" onClick={() => {
+                      router.push('/signin')
+                    }}>
                       Login
                     </button>
-                    <button className="flex-1 py-2.5 rounded-lg bg-orange-600 dark:bg-orange-500 text-orange-50 text-sm font-semibold">
+                    <button className="flex-1 py-2.5 rounded-lg bg-orange-600 dark:bg-orange-500 text-orange-50 text-sm font-semibold" onClick={() => {
+                       router.push('/signup')
+                    }}>
                       Register
                     </button>
                   </div>
@@ -221,9 +235,11 @@ function ThemeToggle() {
   );
 }
 
-function DropdownItem({ icon: Icon, label, danger }) {
+function DropdownItem({ icon: Icon, label, danger,fun }) {
   return (
-    <button
+    <button onClick={async () => {
+      fun()
+    }}
       className={[
         "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm font-medium text-left transition-colors",
         danger
