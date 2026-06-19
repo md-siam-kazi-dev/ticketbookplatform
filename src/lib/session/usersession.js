@@ -1,9 +1,21 @@
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
-const getSession = async ()=>{
-    const {user} = await auth.api.getSession({
-  headers: await headers(),
+export const getSession = async ()=>{
+    const session = await auth.api.getSession({
+     headers: await headers(),
 });
- return user;
+    return session?.user;
+}
+
+
+export const getRoleAuth = async (role) => {
+  const session = await getSession();
+  console.log(session)
+  
+  if(role != session?.role){
+    redirect('/nonauthorized');
+
+  }
 }

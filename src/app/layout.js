@@ -5,6 +5,7 @@ import ThemeProvider from "./providers/ThemeProvider";
 import TicketLagbeFooter from "@/components/footer/footer";
 import { DotBackgroundDemo } from "@/components/dotbg";
 import SplashScreen from "@/components/SplashScreen";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,6 +37,7 @@ export default function RootLayout({ children }) {
             <SplashScreen />
             {children}
           </main>
+          <Toaster position="top-center" />
           {/* <DotBackgroundDemo /> */}
           <TicketLagbeFooter />
         </ThemeProvider>
