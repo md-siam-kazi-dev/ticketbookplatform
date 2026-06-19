@@ -4,8 +4,10 @@ import { Calendar, Upload, MapPin, DollarSign, Ticket, Clock, ShieldCheck } from
 import { useSession } from '@/lib/auth-client';
 import AddTicketFormSkeleton from '@/components/loadinganimation/addTicketSkeletion';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 export default function AddTicketForm() {
+  const router = useRouter()
   const { data, isPending } = useSession();
   const user = data?.user;
   
@@ -94,6 +96,14 @@ export default function AddTicketForm() {
       },
       body:JSON.stringify(completeSubmission),
     })
+    
+    const msg = await res.json();
+    console.log(msg)
+    if(msg){
+      toast('New Added Ticket Waiting for Approval')
+      router.push('/dashboard/vendor/my-tickets')
+
+    }
     
   };
 
@@ -257,11 +267,11 @@ export default function AddTicketForm() {
   </label>
 
   {formData.imageUrl ? (
-    <div className="relative w-full rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-800">
+    <div className="relative w-fit rounded-lg overflow-hidden border border-gray-200 dark:border-zinc-800">
       <img
         src={formData.imageUrl}
         alt="Uploaded preview"
-        className="w-full h-48 object-cover"
+        className="w-100 h-48 object-cover"
       />
       <button
         type="button"

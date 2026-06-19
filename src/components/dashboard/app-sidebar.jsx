@@ -133,10 +133,6 @@ export function AppSidebar({user}) {
   const pathname  = usePathname()
   const router    = useRouter()
 
-  console.log(pathname)
-  
-
- 
   const links  = NAV_MAP[user?.role]  ?? []
   const panel  = LABEL_MAP[user?.role] ?? "Panel"
 
@@ -144,7 +140,11 @@ export function AppSidebar({user}) {
     ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : "TL"
 
+  // Fixed active path evaluation behavior
   const isActive = (href) => {
+    if (href === "/dashboard/user" || href === "/dashboard/vendor" || href === "/dashboard/admin") {
+      return pathname === href
+    }
     if (href.endsWith("/profile")) return pathname === href
     return pathname.startsWith(href)
   }

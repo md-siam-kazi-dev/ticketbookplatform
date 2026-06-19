@@ -1,9 +1,48 @@
+'use client'
+import TicketCard from "@/components/dashboard/ticketCard";
+import { useSession } from "@/lib/auth-client";
+import { myTicket } from "@/lib/serverFunction/myticket";
+// import { getSession } from "@/lib/session/usersession";
+// import { getSession } from "better-auth/api"
+import { useEffect, useState } from "react";
 
-export default function Page() {
+export default  function Page() {
+   
+  const [tickets,setTickets] = useState([]);
+  const [issPending,setIsPending] = useState(true)
+  const {data,isPending} = useSession();
+  const user = data?.user
+  useEffect(() => {
+
+    const getData = async() => {
+
+      if(!isPending){
+        const ticketss= await myTicket(user)
+        console.log(ticketss)
+        setTickets(ticketss)
+        setIsPending(false)
+
+      }
+     
+     
+      
+    }
+    getData()
+    
+
+  },[tickets,setTickets,isPending])
+
+ 
+
+
+  
+  
+  
   return (
-    <div className="p-6">
+    <div className="p-2">
       <h1 className="text-2xl font-semibold">Vendor — My Tickets</h1>
-      <p className="mt-2 text-sm text-stone-500">Manage tickets you've added.</p>
+      <p className="mt-2 text-sm mb-10 text-stone-500">Manage tickets you've added.</p>
+      <TicketCard tickets={tickets} isLoading={issPending}/>
     </div>
   )
 }
