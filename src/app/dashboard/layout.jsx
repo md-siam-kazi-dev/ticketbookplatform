@@ -10,16 +10,16 @@ export default async function  DashboardLayout({ children }) {
     const user = await getSession();
 
   return (
-    <div >
+    <div className="mt-20">
         <TooltipProvider>
       <SidebarProvider>
-        <div className="flex min-h-screen w-full">
+        <div className="flex min-h-screen  w-full">
           <AppSidebar user={user}/>
 
-          <div className="flex flex-1 flex-col">
-            <header className="flex h-14 items-center gap-4 border-b bg-background px-4">
+          <div className="flex flex-1 dark:bg-zinc-950 flex-col ">
+            <header className="flex h-10 dark:bg-muted/40 items-center gap-4 border-b bg-background px-4">
               <SidebarTrigger />
-              <div className="flex-1" />
+              <div className="flex-1 dark:bg-zinc-950" />
             </header>
 
             <main className="flex-1 overflow-y-auto bg-muted/40 p-6">

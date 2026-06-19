@@ -10,17 +10,14 @@ export default function TicketLagbeNavbar() {
   const { data, isPending } = useSession();
   const user = data?.user;
 
+
   const NAV_LINKS = [
     { label: "Home", href: "/" },
     { label: "All Tickets", href: "/tickets" },
     {
       label: "Dashboard",
-      href: user?.role === "vendor"
-        ? "/dashboard/vendor"
-        : user?.role === "admin"
-        ? "/dashboard/admin"
-        : "/dashboard/user",
-    },
+      href: `/dashboard/${user?.role}`
+    }
   ];
 
   const router = useRouter();
@@ -85,7 +82,7 @@ export default function TicketLagbeNavbar() {
 
           {/* Desktop links */}
           <ul className="hidden md:flex items-center gap-1 flex-1 justify-center">
-            {NAV_LINKS.filter((l) => l.label !== "Dashboard" || !!user).map((link) => (
+            {NAV_LINKS.map((link) => (
               <li key={link.label}>
                 <Link
                   href={link.href}
@@ -139,13 +136,7 @@ export default function TicketLagbeNavbar() {
                         icon={User}
                         label="My Profile"
                         fun={() =>
-                          router.push(
-                            user.role === "vendor"
-                              ? "/dashboard/vendor/profile"
-                              : user.role === "admin"
-                              ? "/dashboard/admin/profile"
-                              : "/dashboard/user/profile"
-                          )
+                          router.push(`/dashboard/${user.role}/profile`)
                         }
                       />
                       <DropdownItem

@@ -44,6 +44,21 @@ const router = useRouter()
     });
   };
 
+  const createUser = async (data) => {
+    
+   
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API}/api/account`,{
+      method:'POST',
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(data)
+    })
+    console.log('data->',res)
+  
+    
+  }
+
   // Sign Up
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -78,8 +93,11 @@ const router = useRouter()
         rememberMe: true,
       },
       {
-        onSuccess: () => {
+        onSuccess: (e) => {
           router.push("/");
+          createUser(e.data.user)
+
+           
         },
 
         onError: (ctx) => {
@@ -92,6 +110,7 @@ const router = useRouter()
         },
       }
     );
+    
 
    
   };

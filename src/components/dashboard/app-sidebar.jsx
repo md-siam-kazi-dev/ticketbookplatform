@@ -26,6 +26,7 @@ import {
   Users,
   Megaphone,
   LogOut,
+  LayoutDashboard
 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Link from "next/link"
@@ -34,25 +35,88 @@ import { authClient, useSession } from "@/lib/auth-client"
 // ── Sidebar nav definitions per role ──────────────────────────────────────────
 
 const userNav = [
-  { title: "User Profile",        icon: User,       href: "/dashboard/user/profile"       },
-  { title: "My Booked Tickets",   icon: BookMarked, href: "/dashboard/user/booked-tickets" },
-  { title: "Transaction History", icon: Receipt,    href: "/dashboard/user/transactions"  },
-]
+  {
+    title: "Overview",
+    icon: LayoutDashboard,
+    href: "/dashboard/user",
+  },
+  {
+    title: "User Profile",
+    icon: User,
+    href: "/dashboard/user/profile",
+  },
+  {
+    title: "My Booked Tickets",
+    icon: BookMarked,
+    href: "/dashboard/user/booked-tickets",
+  },
+  {
+    title: "Transaction History",
+    icon: Receipt,
+    href: "/dashboard/user/transactions",
+  },
+];
 
 const vendorNav = [
-  { title: "Vendor Profile",     icon: User,          href: "/dashboard/vendor/profile"           },
-  { title: "Add Ticket",         icon: PlusCircle,    href: "/dashboard/vendor/add-ticket"        },
-  { title: "My Added Tickets",   icon: Ticket,        href: "/dashboard/vendor/my-tickets"        },
-  { title: "Requested Bookings", icon: ClipboardList, href: "/dashboard/vendor/requested-bookings"},
-  { title: "Revenue Overview",   icon: BarChart2,     href: "/dashboard/vendor/revenue"           },
-]
+  {
+    title: "Overview",
+    icon: LayoutDashboard,
+    href: "/dashboard/vendor",
+  },
+  {
+    title: "Vendor Profile",
+    icon: User,
+    href: "/dashboard/vendor/profile",
+  },
+  {
+    title: "Add Ticket",
+    icon: PlusCircle,
+    href: "/dashboard/vendor/add-ticket",
+  },
+  {
+    title: "My Added Tickets",
+    icon: Ticket,
+    href: "/dashboard/vendor/my-tickets",
+  },
+  {
+    title: "Requested Bookings",
+    icon: ClipboardList,
+    href: "/dashboard/vendor/requested-bookings",
+  },
+  {
+    title: "Revenue Overview",
+    icon: BarChart2,
+    href: "/dashboard/vendor/revenue",
+  },
+];
 
 const adminNav = [
-  { title: "Admin Profile",     icon: User,        href: "/dashboard/admin/profile"         },
-  { title: "Manage Tickets",    icon: ShieldCheck, href: "/dashboard/admin/manage-tickets"  },
-  { title: "Manage Users",      icon: Users,       href: "/dashboard/admin/manage-users"    },
-  { title: "Advertise Tickets", icon: Megaphone,   href: "/dashboard/admin/advertise"       },
-]
+  {
+    title: "Overview",
+    icon: LayoutDashboard,
+    href: "/dashboard/admin",
+  },
+  {
+    title: "Admin Profile",
+    icon: User,
+    href: "/dashboard/admin/profile",
+  },
+  {
+    title: "Manage Tickets",
+    icon: ShieldCheck,
+    href: "/dashboard/admin/manage-tickets",
+  },
+  {
+    title: "Manage Users",
+    icon: Users,
+    href: "/dashboard/admin/manage-users",
+  },
+  {
+    title: "Advertise Tickets",
+    icon: Megaphone,
+    href: "/dashboard/admin/advertise",
+  },
+];
 
 const NAV_MAP   = { user: userNav,   vendor: vendorNav,   admin: adminNav   }
 const LABEL_MAP = { user: "User Panel", vendor: "Vendor Panel", admin: "Admin Panel" }

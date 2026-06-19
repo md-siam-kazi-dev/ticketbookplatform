@@ -238,7 +238,7 @@ function SidebarTrigger({
       }}
       {...props}>
       <PanelLeftIcon />
-      <span className="sr-only">Toggle Sidebar</span>
+      <span className="sr-only w-fit absolute dark:bg-zinc-950">Toggle Sidebar</span>
     </Button>
   );
 }
