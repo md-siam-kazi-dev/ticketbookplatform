@@ -96,6 +96,7 @@ const router = useRouter()
         onSuccess: (e) => {
           router.push("/");
           createUser(e.data.user)
+          console.log(e)
 
            
         },
@@ -103,6 +104,7 @@ const router = useRouter()
         onError: (ctx) => {
           setLoading(false);
           toast.error(ctx.error.message);
+          console.log(ctx)
         },
 
         onResponse: () => {
