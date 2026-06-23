@@ -38,16 +38,15 @@ const router = useRouter()
   // its user schema (see note below the component) for this to persist.
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
+    console.log(role)
    const {data,error}=  await authClient.signIn.social({
       provider: "google",
-      additionalData: {
-		role, // Will be validated server-side
-	},
+      role,
     },{
       
         onSuccess: (e) => {
           router.push("/");
-           createUser(e.data.user)
+           
           
           console.log(e)
 
@@ -68,21 +67,7 @@ const router = useRouter()
    
   };
 
-  const createUser = async (data) => {
-    console.log(data)
-    
-   
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API}/api/account`,{
-      method:'POST',
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify(data)
-    })
-    console.log('data->',res)
   
-    
-  }
 
   // Sign Up
   const handleSignUp = async (e) => {
@@ -120,8 +105,8 @@ const router = useRouter()
       {
         onSuccess: (e) => {
           router.push("/");
-          createUser(e.data.user)
-          console.log(e)
+         
+        
 
            
         },
@@ -137,6 +122,7 @@ const router = useRouter()
         },
       }
     );
+    console.log(data,error)
     
 
    

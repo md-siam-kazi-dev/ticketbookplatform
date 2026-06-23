@@ -1,6 +1,7 @@
 import { AppSidebar } from "@/components/dashboard/app-sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { authClient } from "@/lib/auth-client";
 import { getSession } from "@/lib/session/usersession";
 
 
@@ -8,6 +9,8 @@ import { getSession } from "@/lib/session/usersession";
 export default async function  DashboardLayout({ children }) {
 
     const user = await getSession();
+    await authClient.getSession({ refresh: true });
+    console.log(user)
 
   return (
     <div className="mt-20">

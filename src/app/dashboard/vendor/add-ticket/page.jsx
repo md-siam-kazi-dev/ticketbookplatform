@@ -131,7 +131,7 @@ export default function AddTicketForm() {
   if (isPending) {
     return <AddTicketFormSkeleton />;
   }
-  if (user?.isFraud) {
+  if (user?.isBlock) {
   return (
     <div className="w-full mx-auto p-2">
       <div className="flex flex-col items-center justify-center text-center rounded-xl border border-red-200 bg-red-50/60 dark:bg-red-500/5 dark:border-red-500/20 py-20 px-6 gap-4">
