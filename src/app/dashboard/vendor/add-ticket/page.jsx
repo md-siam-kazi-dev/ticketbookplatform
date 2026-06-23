@@ -104,7 +104,8 @@ export default function AddTicketForm() {
       isAdvertised: false,
       totalSold: 0,
       createdAt: currentTimestamp,
-      updatedAt: currentTimestamp
+      updatedAt: currentTimestamp,
+      isAd:true,
     };
     
     try {
