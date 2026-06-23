@@ -3,15 +3,16 @@
 import React, { useEffect, useState } from "react";
 import { DeleteTicketModal, UpdateTicketModal } from "./Ticketmodal";
 import { useRouter } from "next/navigation";
-// import { UpdateTicketModal, DeleteTicketModal } from "./TicketModals";
 
 const TicketCard = ({ tickets, isLoading, onRefresh ,setLoad}) => {
   const [updateTarget, setUpdateTarget] = useState(null); // ticket object
   const [deleteTarget, setDeleteTarget] = useState(null); // { _id, title }
   const router = useRouter();
+
   useEffect(() => {
     router.push('/dashboard/vendor/my-tickets')
-  },[updateTarget,setUpdateTarget,isLoading,deleteTarget])
+  }, [updateTarget, setUpdateTarget, isLoading, deleteTarget])
+
   // ── Skeleton Loader ──
   if (isLoading) {
     return (
@@ -56,7 +57,9 @@ const TicketCard = ({ tickets, isLoading, onRefresh ,setLoad}) => {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {tickets.map((ticket) => {
-          const isRejected = ticket.status === "rejected";
+          // Changed status to verificationStatus to match backend schema fallback
+          const currentStatus = ticket.verificationStatus || ticket.status || "pending";
+          const isRejected = currentStatus === "rejected";
 
           const formattedDate = new Date(ticket.departureDateTime).toLocaleString([], {
             dateStyle: "medium",
@@ -65,7 +68,7 @@ const TicketCard = ({ tickets, isLoading, onRefresh ,setLoad}) => {
 
           return (
             <div
-              key={ticket._id}
+              key={ticket._id?.$oid || ticket._id}
               className="flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden dark:bg-zinc-900 dark:border-zinc-800"
             >
               {/* Thumbnail */}
@@ -99,17 +102,17 @@ const TicketCard = ({ tickets, isLoading, onRefresh ,setLoad}) => {
 
                 {/* Status Badge */}
                 <div className="absolute top-3 right-3">
-                  {ticket.status === "pending" && (
+                  {currentStatus === "pending" && (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-900/30">
                       ● Pending
                     </span>
                   )}
-                  {ticket.status === "approved" && (
+                  {currentStatus === "approved" && (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-900/30">
                       ● Approved
                     </span>
                   )}
-                  {ticket.status === "rejected" && (
+                  {currentStatus === "rejected" && (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide bg-rose-100 text-rose-800 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-900/30">
                       ● Rejected
                     </span>
@@ -121,7 +124,7 @@ const TicketCard = ({ tickets, isLoading, onRefresh ,setLoad}) => {
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-orange-600 dark:text-orange-400">
-                    <span>{ticket.transportType}</span>
+                    <span className="capitalize">{ticket.transportType}</span>
                     <span className="text-gray-300 dark:text-zinc-700">|</span>
                     <span>{ticket.quantity} Seats</span>
                   </div>
@@ -179,10 +182,9 @@ const TicketCard = ({ tickets, isLoading, onRefresh ,setLoad}) => {
 
                   <button
                     onClick={() =>
-                      setDeleteTarget({ _id: ticket._id, title: ticket.title })
+                      setDeleteTarget({ _id: ticket._id?.$oid || ticket._id, title: ticket.title })
                     }
-                    disabled={isRejected}
-                    className="inline-flex items-center justify-center rounded-lg text-xs font-semibold bg-rose-50 text-rose-600 border border-rose-100 h-9 transition-colors hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 disabled:opacity-40 disabled:pointer-events-none dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30 dark:hover:bg-rose-950/40"
+                    className="inline-flex items-center justify-center rounded-lg text-xs font-semibold bg-rose-50 text-rose-600 border border-rose-100 h-9 transition-colors hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30 dark:hover:bg-rose-950/40"
                   >
                     Delete
                   </button>

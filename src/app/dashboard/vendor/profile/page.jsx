@@ -260,7 +260,7 @@ export default function AdminProfilePage() {
       : "—";
 
   return (
-    <div className="p-6 max-w-xl">
+    <div className=" ">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-50">
