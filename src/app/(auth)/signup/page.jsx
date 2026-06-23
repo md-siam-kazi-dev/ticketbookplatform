@@ -40,11 +40,14 @@ const router = useRouter()
     setGoogleLoading(true);
    const {data,error}=  await authClient.signIn.social({
       provider: "google",
-      role,
+      additionalData: {
+		role, // Will be validated server-side
+	},
     },{
       
         onSuccess: (e) => {
           router.push("/");
+           createUser(e.data.user)
           
           console.log(e)
 
@@ -62,10 +65,11 @@ const router = useRouter()
         },
       
     });
-    createUser(e.data.user)
+   
   };
 
   const createUser = async (data) => {
+    console.log(data)
     
    
     const res = await fetch(`${process.env.NEXT_PUBLIC_API}/api/account`,{

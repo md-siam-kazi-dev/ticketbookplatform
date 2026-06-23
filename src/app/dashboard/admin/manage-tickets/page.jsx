@@ -64,12 +64,12 @@ export default function ManageTickets() {
     );
 
     try {
-      const { token } = await authClient.token();
+      const {data:tokenData} = await authClient.token();
       const res = await fetch(`${process.env.NEXT_PUBLIC_API}/api/admin/tickets`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${tokenData.token}`,
         },
         body: JSON.stringify({ id, verificationStatus: status }),
       });

@@ -232,10 +232,10 @@ export default function AdminProfilePage() {
 
     const fetchUser = async () => {
       try {
-        const token = authClient.token();
+        const {data:tokenData} =await authClient.token();
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API}/api/getuser/${session.user.email}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${tokenData.token}` } }
         );
         if (!res.ok) throw new Error("Failed to fetch profile");
         const json = await res.json();
@@ -260,7 +260,7 @@ export default function AdminProfilePage() {
       : "—";
 
   return (
-    <div className="p-6 max-w-xl">
+    <div className="">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-50">

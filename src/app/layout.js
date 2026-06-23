@@ -3,8 +3,8 @@ import "./globals.css";
 import TicketLagbeNavbar from "@/components/navbar/navbar";
 import ThemeProvider from "./providers/ThemeProvider";
 import TicketLagbeFooter from "@/components/footer/footer";
-import { DotBackgroundDemo } from "@/components/dotbg";
-import SplashScreen from "@/components/SplashScreen";
+// import { DotBackgroundDemo } from "@/components/dotbg";
+// import SplashScreen from "@/components/SplashScreen";
 import { Toaster } from "sonner";
 
 const geistSans = Geist({
@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
             <TicketLagbeNavbar />
           </nav>
           <main>
-            <SplashScreen />
+           
             {children}
           </main>
           <Toaster position="top-center" />

@@ -135,6 +135,7 @@ export function AppSidebar({user}) {
 
   const links  = NAV_MAP[user?.role]  ?? []
   const panel  = LABEL_MAP[user?.role] ?? "Panel"
+  
 
   const initials = user?.name
     ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)

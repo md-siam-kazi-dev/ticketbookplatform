@@ -2,15 +2,17 @@
 
 import AddTicketFormSkeleton from '@/components/loadinganimation/addTicketSkeletion';
 import { useSession } from '@/lib/auth-client';
-import { Clock, DollarSign, MapPin, ShieldCheck, Ticket, Upload } from 'lucide-react';
+import { Clock, DollarSign, MapPin, ShieldCheck, ShieldOff, Ticket, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
 export default function AddTicketForm() {
+
   const router = useRouter();
   const { data, isPending } = useSession();
   const user = data?.user;
+  console.log(user)
 
   const [formData, setFormData] = useState({
     title: '',
@@ -129,6 +131,24 @@ export default function AddTicketForm() {
   if (isPending) {
     return <AddTicketFormSkeleton />;
   }
+  if (user?.isFraud) {
+  return (
+    <div className="w-full mx-auto p-2">
+      <div className="flex flex-col items-center justify-center text-center rounded-xl border border-red-200 bg-red-50/60 dark:bg-red-500/5 dark:border-red-500/20 py-20 px-6 gap-4">
+        <div className="w-14 h-14 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
+          <ShieldOff className="w-7 h-7 text-red-600 dark:text-red-400" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-red-700 dark:text-red-400">Account Restricted</h2>
+          <p className="text-sm text-red-500 dark:text-red-400/80 mt-1.5 max-w-sm">
+            Your account has been flagged for fraudulent activity. You are not allowed to add new tickets. Please contact support if you believe this is a mistake.
+          </p>
+        </div>
+       
+      </div>
+    </div>
+  );
+}
 
   return (
     <div className="w-full mx-auto p-2">

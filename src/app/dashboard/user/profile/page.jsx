@@ -98,14 +98,14 @@ function EditProfileModal({ open, onClose, user, onSaved }) {
       let imgUrl = user?.img || "";
       if (file) imgUrl = await uploadToImgbb(file);
 
-      const token = authClient.token();
+      const {data:tokenData} =await authClient.token();
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API}/api/admin/getuser`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${tokenData.token}`,
           },
           body: JSON.stringify({ name, img: imgUrl, email: user.email }),
         }
@@ -232,10 +232,10 @@ export default function AdminProfilePage() {
 
     const fetchUser = async () => {
       try {
-        const token = authClient.token();
+        const {data:tokenData} =await authClient.token();
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API}/api/getuser/${session.user.email}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${tokenData.token}` } }
         );
         if (!res.ok) throw new Error("Failed to fetch profile");
         const json = await res.json();

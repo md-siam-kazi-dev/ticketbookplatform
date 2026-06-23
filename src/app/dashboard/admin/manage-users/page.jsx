@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { getAdminUser } from "@/lib/serverFunction/getAdminUser";
+import { email } from "zod";
 
 const ROLE_STYLES = {
   user:
@@ -47,7 +48,7 @@ export default function ManageUsers() {
     }
   };
 
-  const handleAction = async (id, action, optimisticPatch) => {
+  const handleAction = async (id, action, optimisticPatch,email) => {
     const key = `${id}-${action}`;
     setActionId(key);
 
@@ -68,7 +69,7 @@ export default function ManageUsers() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${data.token}`,
           },
-          body: JSON.stringify({ id, isFraud }),
+          body: JSON.stringify({ id, isFraud,email }),
         });
 
         if (!res.ok) throw new Error("Request failed");
@@ -84,14 +85,14 @@ export default function ManageUsers() {
     }
 
     try {
-      const { data } = await authClient.token();
+      const { data:tokenData } = await authClient.token();
       const res = await fetch(`${process.env.NEXT_PUBLIC_API}/api/admin/users`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${data.token}`,
+          Authorization: `Bearer ${tokenData.token}`,
         },
-        body: JSON.stringify({ id, role }),
+        body: JSON.stringify({ id, role ,email}),
       });
 
       if (!res.ok) throw new Error("Request failed");
@@ -238,7 +239,7 @@ export default function ManageUsers() {
                           ) : (
                             <>
                               <button
-                                onClick={() => handleAction(u._id, "makeAdmin", { role: "admin" })}
+                                onClick={() => handleAction(u._id, "makeAdmin", { role: "admin" },u.email)}
                                 disabled={busyAdmin}
                                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-purple-50 dark:bg-purple-500/10 hover:bg-purple-100 dark:hover:bg-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-purple-700 dark:text-purple-400 text-xs font-semibold transition-colors whitespace-nowrap"
                               >
@@ -248,7 +249,7 @@ export default function ManageUsers() {
 
                               {!isVendor && (
                                 <button
-                                  onClick={() => handleAction(u._id, "makeVendor", { role: "vendor" })}
+                                  onClick={() => handleAction(u._id, "makeVendor", { role: "vendor" },u.email)}
                                   disabled={busyVendor}
                                   className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-blue-700 dark:text-blue-400 text-xs font-semibold transition-colors whitespace-nowrap"
                                 >
@@ -259,7 +260,7 @@ export default function ManageUsers() {
 
                               {isVendor && (
                                 <button
-                                  onClick={() => handleAction(u._id, "markFraud", { isBlock: true })}
+                                  onClick={() => handleAction(u._id, "markFraud", { isBlock: true },u.email)}
                                   disabled={busyFraud}
                                   className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-600 dark:text-red-400 text-xs font-semibold transition-colors whitespace-nowrap"
                                 >
@@ -340,7 +341,7 @@ export default function ManageUsers() {
                     <div className="flex flex-col gap-2 pt-3 border-t border-stone-100 dark:border-neutral-800/80">
                       <div className="flex flex-row items-center gap-2">
                         <button
-                          onClick={() => handleAction(u._id, "makeAdmin", { role: "admin" })}
+                          onClick={() => handleAction(u._id, "makeAdmin", { role: "admin" },u.email)}
                           disabled={busyAdmin}
                           className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg bg-purple-50 dark:bg-purple-500/10 hover:bg-purple-100 dark:hover:bg-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-purple-700 dark:text-purple-400 text-xs font-semibold transition-colors"
                         >
@@ -350,7 +351,7 @@ export default function ManageUsers() {
 
                         {!isVendor && (
                           <button
-                            onClick={() => handleAction(u._id, "makeVendor", { role: "vendor" })}
+                            onClick={() => handleAction(u._id, "makeVendor", { role: "vendor" },u.email)}
                             disabled={busyVendor}
                             className="flex-1 flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-blue-700 dark:text-blue-400 text-xs font-semibold transition-colors"
                           >
@@ -362,7 +363,7 @@ export default function ManageUsers() {
 
                       {isVendor && (
                         <button
-                          onClick={() => handleAction(u._id, "markFraud", { isBlock: true })}
+                          onClick={() => handleAction(u._id, "markFraud", { isBlock: true },u.email)}
                           disabled={busyFraud}
                           className="w-full flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-600 dark:text-red-400 text-xs font-semibold transition-colors"
                         >
