@@ -97,27 +97,27 @@ export default function ManageTickets() {
   };
 
   return (
-    <div className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl overflow-hidden">
+    <div className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl overflow-hidden w-full max-w-full">
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-4 sm:px-6 py-5 border-b border-stone-200 dark:border-neutral-800">
+      {/* Header section with adaptive stacking for different screens */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 px-4 sm:px-6 py-5 border-b border-stone-200 dark:border-neutral-800">
         <div>
-          <h2 className="text-lg font-bold text-stone-900 dark:text-stone-50">
+          <h2 className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-50">
             Manage Tickets
           </h2>
-          <p className="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
+          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-0.5">
             Review and moderate tickets submitted by vendors
           </p>
         </div>
 
-        {/* Filter tabs — horizontally scrollable on mobile */}
-        <div className="flex items-center gap-1 bg-stone-100 dark:bg-neutral-800 rounded-xl p-1 w-fit overflow-x-auto max-w-full">
+        {/* Filter tabs — Horizontally scrollable on small viewports with custom scroll container */}
+        <div className="flex items-center gap-1 bg-stone-100 dark:bg-neutral-800 rounded-xl p-1 w-full lg:w-auto overflow-x-auto scrollbar-none max-w-full touch-pan-x">
           {FILTER_TABS.map((tab) => (
             <button
               key={tab}
               onClick={() => setFilter(tab)}
               className={[
-                "px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors whitespace-nowrap shrink-0",
+                "px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-colors whitespace-nowrap shrink-0 flex-1 lg:flex-none text-center",
                 filter === tab
                   ? "bg-white dark:bg-neutral-700 text-stone-900 dark:text-stone-50 shadow-sm"
                   : "text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200",
@@ -146,18 +146,18 @@ export default function ManageTickets() {
 
       {!loading && filteredTickets.length > 0 && (
         <>
-          {/* ── DESKTOP TABLE (md and up) ── */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-sm">
+          {/* ── DESKTOP & TABLET TABLE (Visible from xl screens up) ── */}
+          <div className="hidden xl:block overflow-x-auto w-full">
+            <table className="w-full text-sm min-w-[950px]">
               <thead>
                 <tr className="border-b border-stone-200 dark:border-neutral-800 bg-stone-50 dark:bg-neutral-800/50">
-                  <th className="text-left font-semibold text-stone-500 dark:text-stone-400 px-6 py-3 whitespace-nowrap">Ticket</th>
-                  <th className="text-left font-semibold text-stone-500 dark:text-stone-400 px-4 py-3 whitespace-nowrap">Route</th>
-                  <th className="text-left font-semibold text-stone-500 dark:text-stone-400 px-4 py-3 whitespace-nowrap">Vendor</th>
-                  <th className="text-left font-semibold text-stone-500 dark:text-stone-400 px-4 py-3 whitespace-nowrap">Departure</th>
-                  <th className="text-right font-semibold text-stone-500 dark:text-stone-400 px-4 py-3 whitespace-nowrap">Price</th>
-                  <th className="text-center font-semibold text-stone-500 dark:text-stone-400 px-4 py-3 whitespace-nowrap">Status</th>
-                  <th className="text-center font-semibold text-stone-500 dark:text-stone-400 px-6 py-3 whitespace-nowrap">Action</th>
+                  <th className="text-left font-semibold text-stone-500 dark:text-stone-400 px-6 py-3.5 whitespace-nowrap">Ticket</th>
+                  <th className="text-left font-semibold text-stone-500 dark:text-stone-400 px-4 py-3.5 whitespace-nowrap">Route</th>
+                  <th className="text-left font-semibold text-stone-500 dark:text-stone-400 px-4 py-3.5 whitespace-nowrap">Vendor</th>
+                  <th className="text-left font-semibold text-stone-500 dark:text-stone-400 px-4 py-3.5 whitespace-nowrap">Departure</th>
+                  <th className="text-right font-semibold text-stone-500 dark:text-stone-400 px-4 py-3.5 whitespace-nowrap">Price</th>
+                  <th className="text-center font-semibold text-stone-500 dark:text-stone-400 px-4 py-3.5 whitespace-nowrap">Status</th>
+                  <th className="text-center font-semibold text-stone-500 dark:text-stone-400 px-6 py-3.5 whitespace-nowrap">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -192,8 +192,8 @@ export default function ManageTickets() {
                         {ticket.from} <span className="text-stone-300 dark:text-stone-600 mx-1">→</span> {ticket.to}
                       </td>
                       <td className="px-4 py-3.5">
-                        <p className="text-stone-700 dark:text-stone-300 font-medium">{ticket.vendorName}</p>
-                        <p className="text-xs text-stone-400 dark:text-stone-500">{ticket.vendorEmail}</p>
+                        <p className="text-stone-700 dark:text-stone-300 font-medium truncate max-w-[150px]">{ticket.vendorName}</p>
+                        <p className="text-xs text-stone-400 dark:text-stone-500 truncate max-w-[170px]">{ticket.vendorEmail}</p>
                       </td>
                       <td className="px-4 py-3.5 whitespace-nowrap text-stone-500 dark:text-stone-400">
                         {day} · {time}
@@ -208,21 +208,21 @@ export default function ManageTickets() {
                       </td>
                       <td className="px-6 py-3.5">
                         {isPending ? (
-                          <div className="flex items-center justify-center gap-2">
+                          <div className="flex items-center justify-center gap-1.5 flex-wrap min-h-[32px]">
                             <button
                               onClick={() => handleStatusChange(ticket._id, "approved")}
                               disabled={isBusy}
-                              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold transition-colors"
+                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold transition-colors whitespace-nowrap"
                             >
-                              {isBusy ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+                              {isBusy ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
                               Approve
                             </button>
                             <button
                               onClick={() => handleStatusChange(ticket._id, "rejected")}
                               disabled={isBusy}
-                              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-600 dark:text-red-400 text-xs font-semibold transition-colors"
+                              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-600 dark:text-red-400 text-xs font-semibold transition-colors whitespace-nowrap"
                             >
-                              {isBusy ? <Loader2 size={13} className="animate-spin" /> : <X size={13} />}
+                              {isBusy ? <Loader2 size={12} className="animate-spin" /> : <X size={12} />}
                               Reject
                             </button>
                           </div>
@@ -239,8 +239,8 @@ export default function ManageTickets() {
             </table>
           </div>
 
-          {/* ── MOBILE CARDS (below md) ── */}
-          <div className="md:hidden divide-y divide-stone-100 dark:divide-neutral-800">
+          {/* ── MOBILE & TABLET RESPONSIVE GRID CARDS (Below xl screens) ── */}
+          <div className="xl:hidden grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-stone-50/50 dark:bg-neutral-950/20">
             {filteredTickets.map((ticket) => {
               const TransportIcon = TRANSPORT_ICON[ticket.transportType] || Bus;
               const isPending = ticket.verificationStatus === "pending";
@@ -248,83 +248,87 @@ export default function ManageTickets() {
               const { day, time } = formatDate(ticket.departureDateTime);
 
               return (
-                <div key={ticket._id} className="p-4 flex flex-col gap-3">
-
-                  {/* Top row: image + title/type + status badge */}
-                  <div className="flex items-start gap-3">
-                    <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-stone-100 dark:bg-neutral-800">
-                      <img src={ticket.image} alt={ticket.title} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-stone-900 dark:text-stone-50 leading-snug">
-                        {ticket.title}
-                      </p>
-                      <span className="inline-flex items-center gap-1 text-xs text-stone-400 dark:text-stone-500 mt-1">
-                        <TransportIcon size={12} />
-                        {ticket.transportType}
+                <div 
+                  key={ticket._id} 
+                  className="p-4 sm:p-5 flex flex-col justify-between gap-4 bg-white dark:bg-neutral-900 border border-stone-100 dark:border-neutral-800/80 rounded-xl shadow-sm"
+                >
+                  <div>
+                    {/* Top segment: image + title details & status */}
+                    <div className="flex items-start gap-3">
+                      <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-stone-100 dark:bg-neutral-800">
+                        <img src={ticket.image} alt={ticket.title} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-stone-900 dark:text-stone-50 text-sm sm:text-base leading-snug truncate">
+                          {ticket.title}
+                        </p>
+                        <span className="inline-flex items-center gap-1 text-xs text-stone-400 dark:text-stone-500 mt-1">
+                          <TransportIcon size={12} />
+                          {ticket.transportType}
+                        </span>
+                      </div>
+                      <span className={["shrink-0 px-2.5 py-0.5 rounded-full text-[11px] font-semibold capitalize border", STATUS_STYLES[ticket.verificationStatus]].join(" ")}>
+                        {ticket.verificationStatus}
                       </span>
                     </div>
-                    <span className={["shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold capitalize border", STATUS_STYLES[ticket.verificationStatus]].join(" ")}>
-                      {ticket.verificationStatus}
-                    </span>
-                  </div>
 
-                  {/* Route + departure + price — stacked lines for readability */}
-                  <div className="grid grid-cols-2 gap-3 text-sm bg-stone-50 dark:bg-neutral-800/50 rounded-xl px-3.5 py-3">
-                    <div>
-                      <p className="text-[11px] text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-0.5">Route</p>
-                      <p className="text-stone-800 dark:text-stone-200 font-medium">
-                        {ticket.from} → {ticket.to}
-                      </p>
+                    {/* Route context, departure & pricing lines */}
+                    <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm bg-stone-50 dark:bg-neutral-800/40 rounded-xl px-3.5 py-3 mt-4">
+                      <div>
+                        <p className="text-[10px] sm:text-[11px] text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-0.5">Route</p>
+                        <p className="text-stone-800 dark:text-stone-200 font-medium truncate">
+                          {ticket.from} → {ticket.to}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] sm:text-[11px] text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-0.5">Price</p>
+                        <p className="text-stone-800 dark:text-stone-200 font-semibold">
+                          ৳{ticket.price.toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-[10px] sm:text-[11px] text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-0.5">Departure</p>
+                        <p className="text-stone-800 dark:text-stone-200">
+                          {day} · {time}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[11px] text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-0.5">Price</p>
-                      <p className="text-stone-800 dark:text-stone-200 font-semibold">
-                        ৳{ticket.price.toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="col-span-2">
-                      <p className="text-[11px] text-stone-400 dark:text-stone-500 uppercase tracking-wide mb-0.5">Departure</p>
-                      <p className="text-stone-800 dark:text-stone-200">
-                        {day} · {time}
-                      </p>
-                    </div>
-                  </div>
 
-                  {/* Vendor info — own line, multi-line friendly */}
-                  <div className="flex flex-col gap-1 text-sm">
-                    <div className="flex items-center gap-1.5 text-stone-600 dark:text-stone-300">
-                      <User2 size={13} className="text-stone-400 dark:text-stone-500 shrink-0" />
-                      <span className="font-medium">{ticket.vendorName}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-stone-400 dark:text-stone-500 break-all">
-                      <Mail size={13} className="shrink-0" />
-                      <span className="text-xs">{ticket.vendorEmail}</span>
+                    {/* Vendor Contact details section */}
+                    <div className="flex flex-col gap-1 text-xs sm:text-sm mt-4">
+                      <div className="flex items-center gap-1.5 text-stone-600 dark:text-stone-300">
+                        <User2 size={13} className="text-stone-400 dark:text-stone-500 shrink-0" />
+                        <span className="font-medium truncate">{ticket.vendorName}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-stone-400 dark:text-stone-500 break-all">
+                        <Mail size={13} className="shrink-0" />
+                        <span className="text-xs truncate">{ticket.vendorEmail}</span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Actions — full width, roomy tap targets */}
+                  {/* Operational actions logic layout */}
                   {isPending ? (
-                    <div className="flex items-center gap-2 pt-1">
+                    <div className="flex items-center gap-2 pt-3 border-t border-stone-100 dark:border-neutral-800/80">
                       <button
                         onClick={() => handleStatusChange(ticket._id, "approved")}
                         disabled={isBusy}
-                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-semibold transition-colors"
                       >
-                        {isBusy ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
+                        {isBusy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
                         Approve
                       </button>
                       <button
                         onClick={() => handleStatusChange(ticket._id, "rejected")}
                         disabled={isBusy}
-                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-600 dark:text-red-400 text-sm font-semibold transition-colors"
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-red-600 dark:text-red-400 text-xs sm:text-sm font-semibold transition-colors"
                       >
-                        {isBusy ? <Loader2 size={15} className="animate-spin" /> : <X size={15} />}
+                        {isBusy ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />}
                         Reject
                       </button>
                     </div>
                   ) : (
-                    <p className="text-center text-xs text-stone-400 dark:text-stone-500 italic pt-1">
+                    <p className="text-center text-xs text-stone-400 dark:text-stone-500 italic pt-2 border-t border-stone-100 dark:border-neutral-800/80">
                       Already {ticket.verificationStatus}
                     </p>
                   )}
@@ -337,3 +341,4 @@ export default function ManageTickets() {
     </div>
   );
 }
+ 

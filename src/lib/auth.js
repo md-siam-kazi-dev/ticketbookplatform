@@ -14,12 +14,26 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  baseURL: process.env.BETTER_AUTH_URL, 
+    socialProviders: {
+        google: { 
+            clientId: process.env.GOOGLE_CLIENT_ID, 
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET , 
+        }, 
+    },
   user: {
     additionalFields: {
       role: {
         default: "user",
       },
     },
+  },
+  session:{
+    cookieCache:{
+      enabled:true,
+      strategy:'jwt',
+      maxAge:24*7*60*60,
+    }
   },
   plugins: [
         jwt(), 

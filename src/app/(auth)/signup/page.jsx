@@ -38,10 +38,31 @@ const router = useRouter()
   // its user schema (see note below the component) for this to persist.
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
-    await authClient.signIn.social({
+   const {data,error}=  await authClient.signIn.social({
       provider: "google",
       role,
+    },{
+      
+        onSuccess: (e) => {
+          router.push("/");
+          
+          console.log(e)
+
+           
+        },
+
+        onError: (ctx) => {
+          setLoading(false);
+          toast.error(ctx.error.message);
+          console.log(ctx)
+        },
+
+        onResponse: () => {
+          setLoading(true);
+        },
+      
     });
+    createUser(e.data.user)
   };
 
   const createUser = async (data) => {

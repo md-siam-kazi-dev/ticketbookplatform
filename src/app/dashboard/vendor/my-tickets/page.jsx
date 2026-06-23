@@ -12,6 +12,7 @@ export default  function Page() {
   const [issPending,setIsPending] = useState(true)
   const {data,isPending} = useSession();
   const user = data?.user
+  const [load,setLoad] = useState(false)
   useEffect(() => {
 
     const getData = async() => {
@@ -30,7 +31,7 @@ export default  function Page() {
     getData()
     
 
-  },[tickets,setTickets,isPending])
+  },[isPending,load])
 
  
 
@@ -42,7 +43,7 @@ export default  function Page() {
     <div className="p-2">
       <h1 className="text-2xl font-semibold">Vendor — My Tickets</h1>
       <p className="mt-2 text-sm mb-10 text-stone-500">Manage tickets you've added.</p>
-      <TicketCard tickets={tickets} isLoading={issPending}/>
+      <TicketCard tickets={tickets} isLoading={issPending} setLoad={setLoad}/>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Ticket,
   Clock,
@@ -9,32 +10,9 @@ import {
   User2,
   Store,
   ShieldCheck,
+  Cross,
 } from "lucide-react";
-
-/**
- * TicketLagbe — Admin: Overview / Dashboard Home
- *
- * Demo data below — swap `overview` for a server fetch once your API is ready:
- *
- *   const overview = await getAdminOverview();
- *
- * Expected shape:
- * {
- *   totalTickets, pendingTickets, activeTickets, rejectedTickets,
- *   totalAccount, totalUser, totalVendor, totalAdmin
- * }
- */
-
-const DEMO_DATA = {
-  totalTickets: 248,
-  pendingTickets: 19,
-  activeTickets: 211,
-  rejectedTickets: 18,
-  totalAccount: 1342,
-  totalUser: 1190,
-  totalVendor: 138,
-  totalAdmin: 14,
-};
+import { authClient } from "@/lib/auth-client"; // adjust path if needed
 
 const TICKET_STATS = [
   {
@@ -84,16 +62,46 @@ const ACCOUNT_STATS = [
   },
   {
     key: "totalAdmin",
-    label: "Admins",
-    icon: ShieldCheck,
+    label: "Total Blocked",
+    icon: Cross,
     accent: "bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400",
   },
 ];
 
-export default function AdminOverview({ overview = DEMO_DATA }) {
+export default function AdminOverview() {
+  const [overview, setOverview] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchOverview = async () => {
+      try {
+        const {data:tokenData} =await authClient.token();
+        console.log(tokenData.token)
+
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API}/api/admin/overview`,
+          {
+            headers: {
+              Authorization: `Bearer ${tokenData.token}`,
+            },
+          }
+        );
+        if (!res.ok) throw new Error("Failed to fetch overview");
+        const data = await res.json();
+        setOverview(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOverview();
+  }, []);
+
   return (
     <div className="flex flex-col gap-8">
-
       {/* Page heading */}
       <div>
         <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-50">
@@ -104,21 +112,29 @@ export default function AdminOverview({ overview = DEMO_DATA }) {
         </p>
       </div>
 
+      {error && (
+        <p className="text-sm text-red-500 dark:text-red-400">{error}</p>
+      )}
+
       {/* ── Tickets section ── */}
       <section>
         <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-400 dark:text-stone-500 mb-3">
           Tickets
         </h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {TICKET_STATS.map(({ key, label, icon: Icon, accent }) => (
-            <StatCard
-              key={key}
-              icon={Icon}
-              accent={accent}
-              label={label}
-              value={overview[key]}
-            />
-          ))}
+          {TICKET_STATS.map(({ key, label, icon: Icon, accent }) =>
+            loading ? (
+              <SkeletonCard key={key} />
+            ) : (
+              <StatCard
+                key={key}
+                icon={Icon}
+                accent={accent}
+                label={label}
+                value={overview?.[key]}
+              />
+            )
+          )}
         </div>
       </section>
 
@@ -128,18 +144,21 @@ export default function AdminOverview({ overview = DEMO_DATA }) {
           Accounts
         </h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {ACCOUNT_STATS.map(({ key, label, icon: Icon, accent }) => (
-            <StatCard
-              key={key}
-              icon={Icon}
-              accent={accent}
-              label={label}
-              value={overview[key]}
-            />
-          ))}
+          {ACCOUNT_STATS.map(({ key, label, icon: Icon, accent }) =>
+            loading ? (
+              <SkeletonCard key={key} />
+            ) : (
+              <StatCard
+                key={key}
+                icon={Icon}
+                accent={accent}
+                label={label}
+                value={overview?.[key]}
+              />
+            )
+          )}
         </div>
       </section>
-
     </div>
   );
 }
@@ -147,7 +166,12 @@ export default function AdminOverview({ overview = DEMO_DATA }) {
 function StatCard({ icon: Icon, accent, label, value }) {
   return (
     <div className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl p-4 sm:p-5 flex flex-col gap-3">
-      <span className={["flex items-center justify-center w-9 h-9 rounded-xl shrink-0", accent].join(" ")}>
+      <span
+        className={[
+          "flex items-center justify-center w-9 h-9 rounded-xl shrink-0",
+          accent,
+        ].join(" ")}
+      >
         <Icon size={18} strokeWidth={2.2} />
       </span>
       <div>
@@ -157,6 +181,21 @@ function StatCard({ icon: Icon, accent, label, value }) {
         <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1.5">
           {label}
         </p>
+      </div>
+    </div>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 animate-pulse">
+      {/* icon placeholder */}
+      <div className="w-9 h-9 rounded-xl bg-stone-200 dark:bg-neutral-700" />
+      <div className="flex flex-col gap-2">
+        {/* number placeholder */}
+        <div className="h-8 w-20 rounded-lg bg-stone-200 dark:bg-neutral-700" />
+        {/* label placeholder */}
+        <div className="h-3 w-24 rounded-md bg-stone-100 dark:bg-neutral-800" />
       </div>
     </div>
   );
