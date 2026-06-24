@@ -24,6 +24,7 @@ export default function proxy(request) {
 export const config = {
    matcher: [
     '/dashboard/:role*',
-    '/dashboard/:role*/:nav*'
+    '/dashboard/:role*/:nav*',
+    '/tickets/:id*'
   ],
 };
