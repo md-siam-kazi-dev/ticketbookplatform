@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import { authClient, useSession } from "@/lib/auth-client";
 import {
-  Loader2, BadgeCheck, XCircle, Clock,
+  Loader2, BadgeCheck, XCircle, Clock, ShieldOff,
   Users, PackageOpen, ChevronUp, ChevronDown, Calendar, Wallet
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatDate(raw) {
@@ -36,29 +37,68 @@ function StatusBadge({ status }) {
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function RequestedBookings() {
   const { data: session, isPending: sessionPending } = useSession();
-  const [bookings,  setBookings]  = useState([]);
-  const [loading,   setLoading]   = useState(true);
-  const [filter,    setFilter]    = useState("all");
+  
+  const [user, setUser] = useState(null);
+  const [isFetchingUser, setIsFetchingUser] = useState(true);
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
   
   // Track BOTH the booking ID and the specific action type being executed
   const [currentAction, setCurrentAction] = useState({ id: null, type: null }); 
   
   const [sortField, setSortField] = useState("departureDateTime");
-  const [sortDir,   setSortDir]   = useState("asc");
+  const [sortDir, setSortDir] = useState("asc");
   const router = useRouter();
 
-  // ── Fetch Booking Records ──────────────────────────────────────────────────
+  // ── 1. Fetch Fresh Profile Logs to Avoid Session Cache Stale Data ──────────
   useEffect(() => {
-    if (sessionPending || !session?.user?.email) return;
-    const load = async () => {
+    const fetchFreshUser = async () => {
+      if (!session?.user?.email) return;
+
+      try {
+        setIsFetchingUser(true);
+        const tokenResponse = await authClient.token();
+        const tokenData = tokenResponse?.data;
+
+        if (!tokenData?.token) throw new Error("No active authorization token found");
+
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API}/api/getuser/${session.user.email}`,
+          { headers: { 'Authorization': `Bearer ${tokenData.token}` } }
+        );
+        
+        if (!res.ok) throw new Error("Could not extract active profile logs");
+        
+        const json = await res.json();
+        const userProfile = Array.isArray(json) ? json[0] : json;
+        setUser(userProfile);
+      } catch (err) {
+        toast.error(err.message || "Failed to sync profile restriction status");
+      } finally {
+        setIsFetchingUser(false);
+      }
+    };
+
+    if (!sessionPending) {
+      fetchFreshUser();
+    }
+  }, [session, sessionPending]);
+
+  // ── 2. Fetch Booking Records After Identity Confirmed ──────────────────────
+  useEffect(() => {
+    if (isFetchingUser || !user || user?.isBlock) {
+      if (!isFetchingUser && !user) setLoading(false);
+      return;
+    }
+
+    const loadBookings = async () => {
       setLoading(true);
       try {
         const { data: tokenData } = await authClient.token();
-        const res  = await fetch(
-          `${process.env.NEXT_PUBLIC_API}/api/bookings/vendor/${session?.user?.email}`, {
-            headers: {
-              'Authorization': `bearer ${tokenData.token}`
-            },
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API}/api/bookings/vendor/${user.email}`, {
+            headers: { 'Authorization': `Bearer ${tokenData.token}` },
             cache: 'no-store'
           }
         );
@@ -66,12 +106,14 @@ export default function RequestedBookings() {
         setBookings(Array.isArray(data) ? data : []);
       } catch {
         setBookings([]);
+        toast.error("Failed to load request manifest ledger");
       } finally {
         setLoading(false);
       }
     };
-    load();
-  }, [session, sessionPending]);
+
+    loadBookings();
+  }, [user, isFetchingUser]);
 
   // ── Accept / Reject Handler ────────────────────────────────────────────────
   const handleAction = async (bookingId, ticketId, action) => {
@@ -85,7 +127,7 @@ export default function RequestedBookings() {
           method: "PATCH",
           headers: { 
             "Content-Type": "application/json", 
-            'Authorization': `bearer ${tokenData.token}`
+            'Authorization': `Bearer ${tokenData.token}`
           },
           body: JSON.stringify({ status: action === "accept" ? "accepted" : "rejected", _id: bookingId }),
         }
@@ -98,9 +140,12 @@ export default function RequestedBookings() {
               : b
           )
         );
+        toast.success(`Booking request successfully ${action === "accept" ? "accepted" : "rejected"}`);
+      } else {
+        throw new Error("Target transaction update failed");
       }
     } catch (err) {
-      console.error("Action updates failed:", err);
+      toast.error("Action updates failed");
     } finally {
       setCurrentAction({ id: null, type: null });
       router.refresh();
@@ -144,7 +189,7 @@ export default function RequestedBookings() {
       return 0;
     });
 
-  if (sessionPending) {
+  if (sessionPending || isFetchingUser) {
     return (
       <div className="flex items-center justify-center py-24">
         <Loader2 size={22} className="animate-spin text-stone-400" />
@@ -152,8 +197,27 @@ export default function RequestedBookings() {
     );
   }
 
+  // Account enforcement restricted shield
+  if (user?.isBlock) {
+    return (
+      <div className="w-full mx-auto p-2 max-w-full box-border">
+        <div className="flex flex-col items-center justify-center text-center rounded-2xl border border-stone-200 bg-white dark:bg-neutral-900 dark:border-neutral-800 py-16 px-6 gap-4 shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 flex items-center justify-center">
+            <ShieldOff className="w-6 h-6 text-red-600 dark:text-red-400" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="text-lg font-bold text-stone-900 dark:text-stone-50">Account Restricted</h2>
+            <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1.5 max-w-sm mx-auto leading-relaxed">
+              Your account has been flagged for fraudulent activity. Access to real-time seat processing registers has been frozen. Please contact support.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-5 px-2 sm:px-4 lg:px-0 max-w-7xl mx-auto">
+    <div className="space-y-5 px-2 ">
 
       {/* Header Container */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -227,10 +291,10 @@ export default function RequestedBookings() {
       ) : (
         <div className="space-y-5">
           
-          {/* 📱 EARLY CARD GRID VIEW (1 column on mobile, 2 columns on tablet/medium lap, hidden on desktop) */}
+          {/* 📱 EARLY CARD GRID VIEW (Mobile/Tablet Viewports) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 xl:hidden">
             {displayed.map((booking) => {
-              const isPending = booking.status === "pending";
+              const isPendingStatus = booking.status === "pending";
               const isAcceptLoading = currentAction.id === booking._id && currentAction.type === "accept";
               const isRejectLoading = currentAction.id === booking._id && currentAction.type === "reject";
               const isAnyRowBusy   = currentAction.id !== null;
@@ -241,7 +305,6 @@ export default function RequestedBookings() {
                   className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-xl p-4 shadow-sm flex flex-col justify-between space-y-4"
                 >
                   <div className="space-y-3.5">
-                    {/* Customer Meta Row */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
                         {booking?.userImg ? (
@@ -263,7 +326,6 @@ export default function RequestedBookings() {
                       <StatusBadge status={booking.status} />
                     </div>
 
-                    {/* Booking Details Plate */}
                     <div className="p-3 bg-stone-50 dark:bg-neutral-800/40 rounded-xl space-y-2.5 text-xs text-stone-600 dark:text-stone-300">
                       <div className="flex items-center gap-2 font-semibold text-stone-900 dark:text-stone-50 pb-2 border-b border-stone-200/60 dark:border-neutral-800">
                         <img src={booking.image} className="w-6 h-6 rounded object-cover shrink-0" alt="" onError={(e) => { e.target.style.display = "none"; }} />
@@ -287,9 +349,8 @@ export default function RequestedBookings() {
                     </div>
                   </div>
 
-                  {/* Operational Controller buttons */}
                   <div className="pt-2">
-                    {isPending ? (
+                    {isPendingStatus ? (
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={() => handleAction(booking._id, booking.ticketId, "accept")}
@@ -317,7 +378,7 @@ export default function RequestedBookings() {
             })}
           </div>
 
-          {/* 💻 DESKTOP COMPACT DATA TABLE VIEW (Rendered strictly on screen-xl and up) */}
+          {/* 💻 DESKTOP COMPACT DATA TABLE VIEW (Desktop Viewports) */}
           <div className="hidden xl:block bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[800px] text-sm">
@@ -350,7 +411,7 @@ export default function RequestedBookings() {
                 </thead>
                 <tbody className="divide-y divide-stone-100 dark:divide-neutral-800">
                   {displayed.map((booking) => {
-                    const isPending = booking.status === "pending";
+                    const isPendingStatus = booking.status === "pending";
                     const isAcceptLoading = currentAction.id === booking._id && currentAction.type === "accept";
                     const isRejectLoading = currentAction.id === booking._id && currentAction.type === "reject";
                     const isAnyRowBusy   = currentAction.id !== null;
@@ -421,7 +482,7 @@ export default function RequestedBookings() {
 
                         {/* Actions Control */}
                         <td className="px-4 py-3.5">
-                          {isPending ? (
+                          {isPendingStatus ? (
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => handleAction(booking._id, booking.ticketId, "accept")}
@@ -452,7 +513,7 @@ export default function RequestedBookings() {
             </div>
           </div>
 
-          {/* Metric Count Footer summary bar */}
+          {/* Metric Count Footer Summary Bar */}
           <div className="px-4 py-3 bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-xl text-xs text-stone-400 dark:text-stone-500 shadow-sm">
             Showing {displayed.length} of {bookings.length} request{bookings.length !== 1 ? "s" : ""}
           </div>
