@@ -1,7 +1,7 @@
 'use client';
 
 import AddTicketFormSkeleton from '@/components/loadinganimation/addTicketSkeletion';
-import { useSession } from '@/lib/auth-client';
+import { authClient, useSession } from '@/lib/auth-client';
 import { Clock, DollarSign, MapPin, ShieldCheck, ShieldOff, Ticket, Upload } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -101,18 +101,20 @@ export default function AddTicketForm() {
       vendorName: vendorName,
       vendorEmail: vendorEmail,
       verificationStatus: "pending",
-      isAdvertised: false,
+      
       totalSold: 0,
       createdAt: currentTimestamp,
       updatedAt: currentTimestamp,
-      isAd:true,
+      isAd:false,
     };
     
     try {
+      const {data:tokenData} = await authClient.token();
       const res = await fetch(`${process.env.NEXT_PUBLIC_API}/api/ticket`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization':`bearerr ${tokenData.token}`
         },
         body: JSON.stringify(completeSubmission),
       });
@@ -327,7 +329,7 @@ export default function AddTicketForm() {
                     <>
                       <Upload className="w-8 h-8 mb-2 text-gray-400 dark:text-zinc-500" />
                       <p className="text-sm text-gray-500 dark:text-zinc-400">
-                        <span className="font-semibold text-orange-600">Click to upload</span> to imgbb
+                        <span className="font-semibold text-orange-600">Click to upload</span>
                       </p>
                     </>
                   )}

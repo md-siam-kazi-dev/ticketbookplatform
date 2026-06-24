@@ -38,7 +38,7 @@ export default  function Page() {
 
   if (user?.isBlock) {
   return (
-    <div className="w-full mx-auto p-2">
+    <div className="w-full">
       <div className="flex flex-col items-center justify-center text-center rounded-xl border border-red-200 bg-red-50/60 dark:bg-red-500/5 dark:border-red-500/20 py-20 px-6 gap-4">
         <div className="w-14 h-14 rounded-full bg-red-100 dark:bg-red-500/10 flex items-center justify-center">
           <ShieldOff className="w-7 h-7 text-red-600 dark:text-red-400" />

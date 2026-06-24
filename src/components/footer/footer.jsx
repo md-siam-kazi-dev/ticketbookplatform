@@ -22,7 +22,7 @@ const PAYMENT_METHODS = ["Stripe", "Visa", "Mastercard", "bKash"];
 
 export default function TicketLagbeFooter() {
   return (
-    <footer className="relative bg-stone-100  dark:bg-neutral-900 border-t border-stone-200 dark:border-neutral-800">
+    <footer className="relative bg-stone-100 w-full  dark:bg-neutral-900 border-t border-stone-200 dark:border-neutral-800">
       {/* Perforated ticket-stub edge — echoes the navbar's signature detail, torn the other way */}
       <div
         aria-hidden="true"

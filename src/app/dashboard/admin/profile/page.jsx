@@ -1,56 +1,56 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Pencil, Upload, X, User } from "lucide-react";
-import { authClient, useSession } from "@/lib/auth-client"; // adjust path if needed
+import { Pencil, Upload, X, User, Loader2 } from "lucide-react";
+import { authClient, useSession } from "@/lib/auth-client";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
-// ─── Skeleton ────────────────────────────────────────────────────────────────
+// ─── SKELETON LOADING STATE ──────────────────────────────────────────────────
 
 function ProfileSkeleton() {
   return (
     <div className="animate-pulse flex flex-col gap-6">
-      {/* avatar + name row */}
       <div className="flex items-center gap-5">
-        <div className="w-20 h-20 rounded-full bg-stone-200 dark:bg-neutral-700 shrink-0" />
+        <div className="w-20 h-20 rounded-full bg-stone-200 dark:bg-neutral-800 shrink-0" />
         <div className="flex flex-col gap-2">
-          <div className="h-5 w-36 rounded-md bg-stone-200 dark:bg-neutral-700" />
-          <div className="h-3 w-24 rounded-md bg-stone-100 dark:bg-neutral-800" />
+          <div className="h-5 w-36 rounded-md bg-stone-200 dark:bg-neutral-800" />
+          <div className="h-3 w-24 rounded-md bg-stone-100 dark:bg-neutral-850" />
         </div>
       </div>
-      {/* info rows */}
-      {[...Array(4)].map((_, i) => (
-        <div key={i} className="flex flex-col gap-1.5">
-          <div className="h-3 w-20 rounded bg-stone-100 dark:bg-neutral-800" />
-          <div className="h-5 w-64 rounded bg-stone-200 dark:bg-neutral-700" />
-        </div>
-      ))}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="flex flex-col gap-1.5">
+            <div className="h-3 w-20 rounded bg-stone-100 dark:bg-neutral-850" />
+            <div className="h-5 w-48 rounded bg-stone-200 dark:bg-neutral-800" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
-// ─── Info row ────────────────────────────────────────────────────────────────
+// ─── INFO DATA FIELDS ────────────────────────────────────────────────────────
 
 function InfoRow({ label, value }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-xs font-medium uppercase tracking-wide text-stone-400 dark:text-stone-500">
+      <span className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
         {label}
       </span>
-      <span className="text-sm text-stone-800 dark:text-stone-100 break-all">
+      <span className="text-sm font-medium text-stone-800 dark:text-stone-100 break-all">
         {value || "—"}
       </span>
     </div>
   );
 }
 
-// ─── Edit Modal ───────────────────────────────────────────────────────────────
+// ─── PROFILE UPDATE MODAL ────────────────────────────────────────────────────
 
 function EditProfileModal({ open, onClose, user, onSaved }) {
   const [name, setName] = useState(user?.name || "");
@@ -60,15 +60,19 @@ function EditProfileModal({ open, onClose, user, onSaved }) {
   const [submitting, setSubmitting] = useState(false);
   const inputRef = useRef(null);
 
-  // sync name when user loads
   useEffect(() => {
-    setName(user?.name || "");
-    setFile(null);
-    setPreview(null);
+    if (open) {
+      setName(user?.name || "");
+      setFile(null);
+      setPreview(null);
+    }
   }, [user, open]);
 
   const handleFile = (f) => {
-    if (!f || !f.type.startsWith("image/")) return;
+    if (!f || !f.type.startsWith("image/")) {
+      toast.error("Please upload a valid image file");
+      return;
+    }
     setFile(f);
     setPreview(URL.createObjectURL(f));
   };
@@ -92,31 +96,42 @@ function EditProfileModal({ open, onClose, user, onSaved }) {
   };
 
   const handleSubmit = async () => {
-    
+    if (!name.trim()) {
+      toast.error("Name field cannot be left empty");
+      return;
+    }
+
     setSubmitting(true);
     try {
       let imgUrl = user?.img || "";
-      if (file) imgUrl = await uploadToImgbb(file);
+      if (file) {
+        imgUrl = await uploadToImgbb(file);
+      }
 
-      const token = authClient.token();
+      const tokenResponse = await authClient.token();
+      const tokenData = tokenResponse?.data;
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API}/api/admin/getuser`,
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${tokenData?.token}`,
           },
           body: JSON.stringify({ name, img: imgUrl, email: user.email }),
         }
       );
-      if (!res.ok) throw new Error("Update failed");
-      const updated = await res.json();
-      onSaved(updated);
-      onClose();
       
+      if (!res.ok) throw new Error("Update lifecycle failed");
+      const updated = await res.json();
+      
+      onSaved(updated);
+      toast.success("Profile records updated successfully!");
+      onClose();
     } catch (err) {
       console.error(err);
+      toast.error("Failed to update profile settings");
     } finally {
       setSubmitting(false);
     }
@@ -124,32 +139,32 @@ function EditProfileModal({ open, onClose, user, onSaved }) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl">
+      <DialogContent className="sm:max-w-md bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl shadow-xl">
         <DialogHeader>
-          <DialogTitle className="text-stone-900 dark:text-stone-50 text-lg font-semibold">
-            Edit Profile
+          <DialogTitle className="text-stone-900 dark:text-stone-50 text-base sm:text-lg font-bold">
+            Edit Profile Details
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col gap-5 mt-2">
-          {/* Name */}
+          {/* Input Name field */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium uppercase tracking-wide text-stone-400 dark:text-stone-500">
-              Name
+            <label className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+              Full Name
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-              className="w-full rounded-xl border border-stone-200 dark:border-neutral-700 bg-stone-50 dark:bg-neutral-800 px-4 py-2.5 text-sm text-stone-900 dark:text-stone-50 outline-none focus:ring-2 focus:ring-orange-400 transition"
+              placeholder="Your profile name"
+              className="w-full rounded-xl border border-stone-200 dark:bg-neutral-900 dark:border-neutral-700 bg-stone-50 dark:bg-neutral-850 px-4 py-2.5 text-sm text-stone-900 dark:text-stone-50 outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
             />
           </div>
 
-          {/* Drop zone */}
+          {/* Asset Dropper Area */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium uppercase tracking-wide text-stone-400 dark:text-stone-500">
-              Profile Picture
+            <label className="text-xs font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
+              Avatar Display
             </label>
             <div
               onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
@@ -157,10 +172,10 @@ function EditProfileModal({ open, onClose, user, onSaved }) {
               onDrop={handleDrop}
               onClick={() => inputRef.current?.click()}
               className={[
-                "relative flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed cursor-pointer transition-colors py-8",
+                "relative flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed cursor-pointer transition-colors py-8 px-4 text-center",
                 dragging
-                  ? "border-orange-400 bg-orange-50 dark:bg-orange-500/10"
-                  : "border-stone-200 dark:border-neutral-700 hover:border-orange-300 hover:bg-stone-50 dark:hover:bg-neutral-800/60",
+                  ? "border-orange-500 bg-orange-50 dark:bg-orange-500/5"
+                  : "border-stone-200 dark:border-neutral-700 hover:border-orange-400 hover:bg-stone-50/50 dark:hover:bg-neutral-850/40",
               ].join(" ")}
             >
               <input
@@ -172,45 +187,58 @@ function EditProfileModal({ open, onClose, user, onSaved }) {
               />
 
               {preview ? (
-                <>
+                <div className="relative group flex flex-col items-center">
                   <img
                     src={preview}
-                    alt="Preview"
-                    className="w-20 h-20 rounded-full object-cover ring-2 ring-orange-400"
+                    alt="Preview avatar target"
+                    className="w-20 h-20 rounded-full object-cover ring-2 ring-orange-500"
                   />
                   <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); setFile(null); setPreview(null); }}
-                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-stone-200 dark:bg-neutral-700 flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-500/20 transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFile(null);
+                      setPreview(null);
+                    }}
+                    className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-white dark:bg-neutral-800 shadow-md border border-stone-200 dark:border-neutral-700 flex items-center justify-center text-stone-500 hover:text-red-500 transition-colors"
                   >
-                    <X size={12} className="text-stone-600 dark:text-stone-300" />
+                    <X size={12} />
                   </button>
-                  <p className="text-xs text-stone-400">Click to change</p>
-                </>
+                  <p className="text-xs text-stone-400 dark:text-stone-500 mt-2">Click to replace file</p>
+                </div>
               ) : (
                 <>
-                  <span className="flex items-center justify-center w-12 h-12 rounded-full bg-stone-100 dark:bg-neutral-800 text-stone-400">
-                    <Upload size={20} />
+                  <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-stone-100 dark:bg-neutral-800 text-stone-500 dark:text-stone-400">
+                    <Upload size={18} />
                   </span>
-                  <p className="text-sm text-stone-500 dark:text-stone-400">
-                    Drop image here or{" "}
-                    <span className="text-orange-500 font-medium">browse</span>
-                  </p>
-                  <p className="text-xs text-stone-400 dark:text-stone-600">
-                    PNG, JPG, WEBP up to 10 MB
-                  </p>
+                  <div>
+                    <p className="text-sm text-stone-600 dark:text-stone-300">
+                      Drop image or <span className="text-orange-500 font-semibold">browse</span>
+                    </p>
+                    <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
+                      PNG, JPG, or WEBP formats up to 10 MB
+                    </p>
+                  </div>
                 </>
               )}
             </div>
           </div>
 
-          {/* Submit */}
+          {/* Action Trigger Row */}
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={submitting}
-            className="w-full rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-semibold py-2.5 transition-colors"
+            className="w-full flex items-center justify-center gap-2 rounded-xl bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold py-2.5 transition-colors shadow-sm"
           >
-            {submitting ? "Saving…" : "Save Changes"}
+            {submitting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <span>Saving Profile Changes...</span>
+              </>
+            ) : (
+              <span>Save Profile</span>
+            )}
           </button>
         </div>
       </DialogContent>
@@ -218,7 +246,7 @@ function EditProfileModal({ open, onClose, user, onSaved }) {
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// ─── ADMIN DASHBOARD PROFILE MAIN WRAPPER ────────────────────────────────────
 
 export default function AdminProfilePage() {
   const [user, setUser] = useState(null);
@@ -232,12 +260,14 @@ export default function AdminProfilePage() {
 
     const fetchUser = async () => {
       try {
-        const {data:tokenData} =await authClient.token();
+        const tokenResponse = await authClient.token();
+        const tokenData = tokenResponse?.data;
+
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API}/api/getuser/${session.user.email}`,
-          { headers: { Authorization: `Bearer ${tokenData.token}` } }
+          { headers: { Authorization: `Bearer ${tokenData?.token}` }}
         );
-        if (!res.ok) throw new Error("Failed to fetch profile");
+        if (!res.ok) throw new Error("Could not extract active profile logs");
         const json = await res.json();
         setUser(json);
       } catch (err) {
@@ -248,7 +278,7 @@ export default function AdminProfilePage() {
     };
 
     fetchUser();
-  }, [session?.user?.email, session,modalOpen]);
+  }, [session?.user?.email,modalOpen]); // Safely targets initial connection arrays cleanly
 
   const formatDate = (iso) =>
     iso
@@ -260,76 +290,83 @@ export default function AdminProfilePage() {
       : "—";
 
   return (
-    <div className="">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-50">
-          Profile
+    <div className="w-full max-w-full">
+      {/* Structural Profile Header section */}
+      <div className="mb-6">
+        <h1 className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-50">
+          Profile Management
         </h1>
-        <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
-          Manage your admin profile details
+        <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-0.5">
+          Review, analyze and manage your root administrative profile structures.
         </p>
       </div>
 
       {error && (
-        <p className="text-sm text-red-500 mb-4">{error}</p>
+        <div className="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-xs text-red-600 dark:text-red-400">
+          Error payload trace: {error}
+        </div>
       )}
 
-      <div className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl p-6 flex flex-col gap-6">
+      <div className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl p-4 sm:p-6 shadow-sm">
         {loading ? (
           <ProfileSkeleton />
         ) : (
-          <>
-            {/* Avatar + name + edit btn */}
-            <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-6">
+            {/* Header Area Card Info */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-4">
                 {user?.img ? (
                   <img
                     src={user.img}
                     alt={user.name}
-                    className="w-20 h-20 rounded-full object-cover ring-2 ring-stone-200 dark:ring-neutral-700"
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-2 ring-stone-100 dark:ring-neutral-800"
                   />
                 ) : (
-                  <span className="w-20 h-20 rounded-full bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center text-orange-500 shrink-0">
-                    <User size={32} />
+                  <span className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center text-orange-600 shrink-0">
+                    <User size={28} />
                   </span>
                 )}
                 <div>
-                  <p className="text-lg font-bold text-stone-900 dark:text-stone-50 leading-tight">
+                  <p className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-50 leading-tight">
                     {user?.name}
                   </p>
-                  <span className="inline-block mt-1 text-xs font-medium px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400 capitalize">
+                  <span className="inline-block mt-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-purple-200 dark:border-purple-500/20 bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400 capitalize">
                     {user?.role}
                   </span>
                 </div>
               </div>
 
               <button
+                type="button"
                 onClick={() => setModalOpen(true)}
-                className="flex items-center gap-2 shrink-0 rounded-xl border border-stone-200 dark:border-neutral-700 bg-stone-50 dark:bg-neutral-800 hover:bg-stone-100 dark:hover:bg-neutral-700 px-4 py-2 text-sm font-medium text-stone-700 dark:text-stone-200 transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-stone-200 dark:border-neutral-700 bg-stone-50 dark:bg-neutral-800 hover:bg-stone-100 dark:hover:bg-neutral-700 px-4 py-2 text-xs font-semibold text-stone-700 dark:text-stone-200 transition-colors shrink-0 sm:ml-auto"
               >
-                <Pencil size={14} />
-                Edit
+                <Pencil size={13} />
+                Edit Profile
               </button>
             </div>
 
             <hr className="border-stone-100 dark:border-neutral-800" />
 
-            {/* Info fields */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <InfoRow label="Email" value={user?.email} />
+            {/* Matrix Data Display Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5">
+              <InfoRow label="Email Address" value={user?.email} />
               <InfoRow
-                label="Account Status"
-                value={user?.isBlock ? "Blocked" : "Active"}
+                label="Account Security Status"
+                value={
+                  <span className={`inline-flex items-center font-bold ${user?.isBlock ? "text-red-500" : "text-green-600"}`}>
+                    {user?.isBlock ? "Suspended / Blocked" : "Active & Clear"}
+                  </span>
+                }
               />
-              <InfoRow label="Member Since" value={formatDate(user?.createdAt)} />
-              <InfoRow label="Last Updated" value={formatDate(user?.updatedAt)} />
+              <InfoRow label="Registration Date" value={formatDate(user?.createdAt)} />
+              <InfoRow label="Last Log Mutation" value={formatDate(user?.updatedAt)} />
             </div>
-          </>
+          </div>
         )}
       </div>
 
-      {/* Edit Modal */}
+      {/* Edit Form Trigger Context */}
       {!loading && (
         <EditProfileModal
           open={modalOpen}
