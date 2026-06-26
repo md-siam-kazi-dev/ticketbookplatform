@@ -22,6 +22,7 @@ const STATUS_STYLE = {
   accepted: { label: "Accepted", bg: "bg-green-50 dark:bg-green-500/10",  text: "text-green-700 dark:text-green-400",  dot: "bg-green-400"  },
   rejected: { label: "Rejected", bg: "bg-red-50 dark:bg-red-500/10",      text: "text-red-600 dark:text-red-400",      dot: "bg-red-400"    },
   paid:     { label: "Paid",     bg: "bg-blue-50 dark:bg-blue-500/10",    text: "text-blue-700 dark:text-blue-400",    dot: "bg-blue-400"   },
+  unpaid:   { label: "Unpaid",   bg: "bg-stone-100 dark:bg-neutral-800", text: "text-stone-600 dark:text-stone-400", dot: "bg-stone-400"  },
 };
 
 function StatusBadge({ status }) {
@@ -30,6 +31,18 @@ function StatusBadge({ status }) {
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${s.bg} ${s.text}`}>
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${s.dot}`} />
       {s.label}
+    </span>
+  );
+}
+
+function PaymentBadge({ isPaid }) {
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+      isPaid 
+        ? "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-200/30 dark:border-blue-500/20" 
+        : "bg-stone-100 dark:bg-neutral-800 text-stone-500 dark:text-stone-400 border-stone-200 dark:border-neutral-700"
+    }`}>
+      {isPaid ? "Paid" : "Unpaid"}
     </span>
   );
 }
@@ -165,15 +178,24 @@ export default function RequestedBookings() {
       : <ChevronDown size={12} className="text-orange-500" />;
   };
 
-  // ── Filters ─────────────────────────────────────────────────────────────────
-  const TABS = ["all", "pending", "accepted", "rejected", "paid"];
+  // ── Filters & Tabs Logic ────────────────────────────────────────────────────
+  const TABS = ["all", "pending", "accepted", "rejected", "paid", "unpaid"];
 
   const counts = TABS.reduce((acc, t) => {
-    acc[t] = t === "all" ? bookings.length : bookings.filter((b) => b.status === t).length;
+    if (t === "all") acc[t] = bookings.length;
+    else if (t === "paid") acc[t] = bookings.filter((b) => b.isPaid === true).length;
+    else if (t === "unpaid") acc[t] = bookings.filter((b) => b.isPaid === false).length;
+    else acc[t] = bookings.filter((b) => b.status === t).length;
     return acc;
   }, {});
 
-  const displayed = (filter === "all" ? bookings : bookings.filter((b) => b.status === filter))
+  const displayed = bookings
+    .filter((b) => {
+      if (filter === "all") return true;
+      if (filter === "paid") return b.isPaid === true;
+      if (filter === "unpaid") return b.isPaid === false;
+      return b.status === filter;
+    })
     .slice()
     .sort((a, b) => {
       let va = a[sortField], vb = b[sortField];
@@ -344,7 +366,10 @@ export default function RequestedBookings() {
                           </p>
                         </div>
                       </div>
-                      <StatusBadge status={booking.status} />
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <StatusBadge status={booking.status} />
+                        <PaymentBadge isPaid={booking.isPaid} />
+                      </div>
                     </div>
 
                     <div className="p-3 bg-stone-50 dark:bg-neutral-800/40 rounded-xl space-y-2.5 text-xs text-stone-600 dark:text-stone-300">
@@ -496,9 +521,12 @@ export default function RequestedBookings() {
                           </p>
                         </td>
 
-                        {/* Status */}
+                        {/* Status & Paid Indicators */}
                         <td className="px-4 py-3.5">
-                          <StatusBadge status={booking.status} />
+                          <div className="flex flex-col gap-1 items-start">
+                            <StatusBadge status={booking.status} />
+                            <PaymentBadge isPaid={booking.isPaid} />
+                          </div>
                         </td>
 
                         {/* Actions Control */}

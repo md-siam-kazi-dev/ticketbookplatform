@@ -88,7 +88,7 @@ export default function AllTicketPage() {
   const [sortOrder, setSortOrder] = useState("none");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const popularRoute = useSearchParams();
+  // const popularRoute = useSearchParams();
    
 
   // 1. Handle Debouncing (Quiet UI generation)
