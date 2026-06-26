@@ -189,16 +189,11 @@ export default function RequestedBookings() {
       return 0;
     });
 
-  if (sessionPending || isFetchingUser) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <Loader2 size={22} className="animate-spin text-stone-400" />
-      </div>
-    );
-  }
+  // Derived loading check combining session sync and database data sync
+  const isGlobalLoading = sessionPending || isFetchingUser || loading;
 
   // Account enforcement restricted shield
-  if (user?.isBlock) {
+  if (!sessionPending && !isFetchingUser && user?.isBlock) {
     return (
       <div className="w-full mx-auto p-2 max-w-full box-border">
         <div className="flex flex-col items-center justify-center text-center rounded-2xl border border-stone-200 bg-white dark:bg-neutral-900 dark:border-neutral-800 py-16 px-6 gap-4 shadow-sm">
@@ -217,7 +212,7 @@ export default function RequestedBookings() {
   }
 
   return (
-    <div className="space-y-5 px-2 ">
+    <div className="space-y-5 px-2">
 
       {/* Header Container */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -226,20 +221,20 @@ export default function RequestedBookings() {
             Requested Bookings
           </h2>
           <p className="text-sm text-stone-400 dark:text-stone-500 mt-0.5">
-            {bookings.length} total request{bookings.length !== 1 ? "s" : ""}
+            {isGlobalLoading ? "Loading updates..." : `${bookings.length} total request${bookings.length !== 1 ? "s" : ""}`}
           </p>
         </div>
 
         {/* Summary Pills */}
         <div className="flex items-center gap-2 flex-wrap">
-          <SummaryPill icon={Clock}      label="Pending"  count={counts.pending}  color="text-amber-500" />
-          <SummaryPill icon={BadgeCheck} label="Accepted" count={counts.accepted} color="text-green-500" />
-          <SummaryPill icon={XCircle}    label="Rejected" count={counts.rejected} color="text-red-500"   />
+          <SummaryPill icon={Clock}      label="Pending"  count={isGlobalLoading ? "—" : counts.pending}  color="text-amber-500" />
+          <SummaryPill icon={BadgeCheck} label="Accepted" count={isGlobalLoading ? "—" : counts.accepted} color="text-green-500" />
+          <SummaryPill icon={XCircle}    label="Rejected" count={isGlobalLoading ? "—" : counts.rejected} color="text-red-500"   />
         </div>
       </div>
 
       {/* Filter Tabs Container */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-2 px-2 sm:mx-0 sm:px-0 flex-nowrap md:flex-wrap border-b border-stone-100 dark:border-neutral-800 xl:border-0">
+      <div className="flex gap-2 pb-2 -mx-2 px-2 sm:mx-0 sm:px-0 flex-wrap md:flex-wrap border-b border-stone-100 dark:border-neutral-800 xl:border-0">
         {TABS.map((tab) => {
           const active = filter === tab;
           const s = STATUS_STYLE[tab];
@@ -247,8 +242,9 @@ export default function RequestedBookings() {
             <button
               key={tab}
               onClick={() => setFilter(tab)}
+              disabled={isGlobalLoading}
               className={[
-                "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium border transition-colors shrink-0",
+                "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-sm font-medium border transition-colors shrink-0 disabled:opacity-60",
                 active
                   ? "bg-stone-900 dark:bg-stone-50 text-stone-50 dark:text-stone-900 border-transparent"
                   : "bg-white dark:bg-neutral-900 border-stone-200 dark:border-neutral-700 text-stone-600 dark:text-stone-300 hover:border-stone-300",
@@ -256,7 +252,7 @@ export default function RequestedBookings() {
             >
               {s && <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />}
               <span className="capitalize">{tab}</span>
-              {counts[tab] > 0 && (
+              {!isGlobalLoading && counts[tab] > 0 && (
                 <span className={[
                   "text-xs px-1.5 py-0.5 rounded-full",
                   active
@@ -271,11 +267,36 @@ export default function RequestedBookings() {
         })}
       </div>
 
-      {/* Core Component Canvas Windows */}
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
-        </div>
+      {/* Core Content Layout Canvas */}
+      {isGlobalLoading ? (
+        <>
+          {/* Mobile Card Skeleton Canvas Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 xl:hidden">
+            {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
+          </div>
+
+          {/* Desktop Table Skeleton Rows Canvas */}
+          <div className="hidden xl:block bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[800px] text-sm">
+                <thead>
+                  <tr className="border-b border-stone-100 dark:border-neutral-800 bg-stone-50 dark:bg-neutral-800/50">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">Customer</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">Ticket</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">Departure</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">Qty</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">Total</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wide">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-stone-100 dark:divide-neutral-800">
+                  {Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       ) : displayed.length === 0 ? (
         <div className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl flex flex-col items-center justify-center py-20 gap-3 text-center px-6 shadow-sm">
           <div className="w-12 h-12 rounded-xl bg-stone-100 dark:bg-neutral-800 flex items-center justify-center">
@@ -291,7 +312,7 @@ export default function RequestedBookings() {
       ) : (
         <div className="space-y-5">
           
-          {/* 📱 EARLY CARD GRID VIEW (Mobile/Tablet Viewports) */}
+          {/* 📱 CARD GRID VIEW (Mobile/Tablet Viewports) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 xl:hidden">
             {displayed.map((booking) => {
               const isPendingStatus = booking.status === "pending";
@@ -543,7 +564,44 @@ function SkeletonCard() {
           <div className="h-2 bg-stone-100 dark:bg-neutral-800 rounded w-1/2" />
         </div>
       </div>
-      <div className="h-20 bg-stone-50 dark:bg-neutral-800/30 rounded-xl" />
+      <div className="h-24 bg-stone-50 dark:bg-neutral-800/30 rounded-xl" />
     </div>
+  );
+}
+
+function SkeletonRow() {
+  return (
+    <tr className="animate-pulse">
+      <td className="px-4 py-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-full bg-stone-100 dark:bg-neutral-800 shrink-0" />
+          <div className="space-y-1.5 w-24">
+            <div className="h-2.5 bg-stone-100 dark:bg-neutral-800 rounded w-full" />
+            <div className="h-2 bg-stone-100 dark:bg-neutral-800 rounded w-2/3" />
+          </div>
+        </div>
+      </td>
+      <td className="px-4 py-4">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-stone-100 dark:bg-neutral-800 shrink-0" />
+          <div className="h-2.5 bg-stone-100 dark:bg-neutral-800 rounded w-28" />
+        </div>
+      </td>
+      <td className="px-4 py-4"><div className="h-2.5 bg-stone-100 dark:bg-neutral-800 rounded w-16" /></td>
+      <td className="px-4 py-4"><div className="h-2.5 bg-stone-100 dark:bg-neutral-800 rounded w-6" /></td>
+      <td className="px-4 py-4">
+        <div className="space-y-1.5">
+          <div className="h-2.5 bg-stone-100 dark:bg-neutral-800 rounded w-14" />
+          <div className="h-2 bg-stone-100 dark:bg-neutral-800 rounded w-10" />
+        </div>
+      </td>
+      <td className="px-4 py-4"><div className="h-5 bg-stone-100 dark:bg-neutral-800 rounded-full w-16" /></td>
+      <td className="px-4 py-4">
+        <div className="flex gap-2">
+          <div className="h-8 bg-stone-100 dark:bg-neutral-800 rounded-lg w-24" />
+          <div className="h-8 bg-stone-100 dark:bg-neutral-800 rounded-lg w-24" />
+        </div>
+      </td>
+    </tr>
   );
 }

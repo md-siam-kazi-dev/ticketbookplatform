@@ -8,6 +8,7 @@ import {
   AlertCircle, PackageOpen,
 } from "lucide-react";
 
+
 // ── helpers ───────────────────────────────────────────────────────────────────
 function pad(n) { return String(n).padStart(2, "0"); }
 
@@ -253,21 +254,33 @@ export default function MyBookedTickets() {
   const handlePayNow = async (booking) => {
     setPayingId(booking._id);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API}/api/payments/create-checkout`, {
+      // 1. Call our secure Next.js API endpoint
+      const response = await fetch("/api/checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
-          bookingId:  booking._id,
-          totalPrice: booking.totalPrice,
-          title:      booking.title,
-          email:      session.user.email,
+          title: booking.title,
+          price: booking.price,       // Pass the unit price
+          quantity: booking.quantity,
+          bookingId:booking._id,
+          userEmail:booking.email // Pass the quantity
         }),
       });
-      const { url } = await res.json();
-      if (url) window.location.href = url;
-    } catch {
-      alert("Payment initiation failed. Please try again.");
-    } finally {
+
+      const data = await response.json();
+
+      if (data.url) {
+        // 2. Redirect the user safely to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Failed to create a checkout session.");
+        setPayingId(null);
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      alert("An unexpected network error occurred.");
       setPayingId(null);
     }
   };

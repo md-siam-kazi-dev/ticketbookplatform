@@ -13,7 +13,7 @@ export default function TicketLagbeNavbar() {
 
   const NAV_LINKS = [
     { label: "Home", href: "/" },
-    { label: "All Tickets", href: "/tickets" },
+    { label: "All Tickets", href: "/alltickets" },
     {
       label: "Dashboard",
       href: `/dashboard/${user?.role}`
@@ -86,7 +86,7 @@ export default function TicketLagbeNavbar() {
               <li key={link.label}>
                 <Link
                   href={link.href}
-                  className="block px-3.5 py-2 rounded-lg text-sm font-medium text-stone-500 dark:text-stone-400 hover:bg-orange-50 dark:hover:bg-orange-500/10 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
+                  className={`block px-3.5 py-2 rounded-lg text-sm font-medium text-stone-500 dark:text-stone-400 hover:bg-orange-50 ${isPending && link.label === 'Dashboard' && 'hidden'} dark:hover:bg-orange-500/10 hover:text-orange-600 dark:hover:text-orange-400 transition-colors`}
                 >
                   {link.label}
                 </Link>
@@ -189,7 +189,7 @@ export default function TicketLagbeNavbar() {
                 key={link.label}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="block py-2.5 border-b border-stone-100 dark:border-neutral-800 text-stone-900 dark:text-stone-50 text-[15px] font-medium"
+                className={`block ${isPending && link.label === 'Dashboard' && 'hidden'}  py-2.5 border-b border-stone-100 dark:border-neutral-800 text-stone-900 dark:text-stone-50 text-[15px] font-medium`}
               >
                 {link.label}
               </Link>

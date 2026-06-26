@@ -78,7 +78,7 @@ export const UpdateTicketModal = ({ ticket, open,setLoad, onClose, onSuccess }) 
     setLoading(true);
     setError("");
     try {
-      const token = await authClient.token();
+      const {data:tokenData} = await authClient.token();
 
       const payload = {
         id:ticket._id,
@@ -102,7 +102,7 @@ export const UpdateTicketModal = ({ ticket, open,setLoad, onClose, onSuccess }) 
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${tokenData.token}`,
           },
           body: JSON.stringify(payload),
         }
@@ -315,14 +315,14 @@ export const DeleteTicketModal = ({ ticketId,setLoad, ticketTitle, open, onClose
     setLoading(true);
     setError("");
     try {
-      const token = await authClient.token();
+      const {data:tokenData} = await authClient.token();
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API}/api/ticket/${ticketId}`,
         {
           method: "DELETE",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${tokenData.token}`,
           },
         }
       );

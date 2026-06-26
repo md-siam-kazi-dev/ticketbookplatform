@@ -1,280 +1,193 @@
-'use client'
-import { useState } from "react";
-import { Bus, Train, Ship, Plane, ArrowRight, MapPin, Calendar, Search } from "lucide-react";
+'use client';
 
-/**
- * TicketLagbe — Hero Banner Section
- * Matches orange-600 / stone / neutral dark-mode palette from Navbar & Footer.
- * Wrap this inside the same `dark`-class ancestor to sync theme.
- *
- * Usage: <HeroBanner />
- */
-
-const TRANSPORT_TABS = [
-  { key: "bus",    label: "Bus",    icon: Bus   },
-  { key: "train",  label: "Train",  icon: Train  },
-  { key: "launch", label: "Launch", icon: Ship   },
-  { key: "flight", label: "Flight", icon: Plane  },
-];
+import { motion } from "framer-motion";
+import { ArrowRight, Bus, TrainFront, Ship, Plane, Star } from "lucide-react";
+import { TypingAnimation } from "../ui/typing-animation";
+import Link from "next/link";
 
 const STATS = [
-  { value: "12K+",  label: "Daily Tickets" },
-  { value: "320+",  label: "Routes" },
-  { value: "98%",   label: "On-time Rate" },
+  { value: "12K+", label: "Daily Tickets" },
+  { value: "320+", label: "Routes"        },
+  { value: "98%",  label: "On-time Rate"  },
+];
+
+const TRANSPORT = [
+  { icon: Bus,        label: "Bus",    color: "bg-orange-50 text-orange-500 border border-orange-100 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20"  },
+  { icon: TrainFront, label: "Train",  color: "bg-blue-50 text-blue-500 border border-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20"            },
+  { icon: Ship,       label: "Launch", color: "bg-cyan-50 text-cyan-500 border border-cyan-100 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20"            },
+  { icon: Plane,      label: "Flight", color: "bg-purple-50 text-purple-500 border border-purple-100 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20"},
+];
+
+const REVIEWS = [
+  { name: "Rafiq H.",  text: "Booked in under 2 minutes. Absolutely seamless." },
+  { name: "Nusrat J.", text: "Best ticket platform in Bangladesh, hands down."  },
+  { name: "Tanvir A.", text: "Real-time seats and instant confirmation. Love it." },
 ];
 
 export default function HeroBanner() {
-  const [activeTab, setActiveTab] = useState("bus");
-  const [from, setFrom]   = useState("");
-  const [to, setTo]       = useState("");
-  const [date, setDate]   = useState("");
-
-  const handleSwap = () => {
-    setFrom(to);
-    setTo(from);
-  };
-
-  const today = new Date().toISOString().split("T")[0];
-
   return (
-    <section className="relative mt-20 md:mt-40  overflow-hidden bg-white dark:bg-neutral-950 transition-colors">
+    <section className="relative mt-16 overflow-hidden bg-[#fafafa] dark:bg-neutral-950 transition-colors">
 
-      {/* ── Gradient wash ── */}
+      {/* ── Background blobs ── */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 70% 60% at 80% 50%, rgba(234,88,12,0.08) 0%, transparent 70%), " +
-            "radial-gradient(ellipse 50% 80% at 0% 100%, rgba(234,88,12,0.05) 0%, transparent 60%)",
+            "radial-gradient(ellipse 70% 50% at 50% -10%, rgba(234,88,12,0.1) 0%, transparent 65%)," +
+            "radial-gradient(ellipse 40% 40% at 50% 100%, rgba(234,88,12,0.05) 0%, transparent 60%)",
         }}
       />
 
-      {/* ── Dot-grid texture ── */}
+      {/* ── Dot grid ── */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.03] dark:opacity-[0.06]"
+        className="pointer-events-none absolute inset-0 opacity-[0.04] dark:opacity-[0.06]"
         style={{
           backgroundImage: "radial-gradient(circle, #78716c 1px, transparent 1px)",
           backgroundSize: "28px 28px",
         }}
       />
 
-      <div className="relative max-w-6xl mx-auto px-6 py-16 md:py-24 flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+      <div className="relative max-w-5xl mx-auto px-6 py-20 sm:py-28 lg:py-32">
+        <div className="flex flex-col items-center gap-16">
 
-        {/* ── LEFT: Copy + stats ── */}
-        <div className="flex-1 text-center lg:text-left">
+          {/* ── TOP: Text content (centered) ── */}
+          <div className="flex flex-col items-center text-center w-full max-w-3xl mx-auto">
 
-          {/* Eyebrow */}
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold tracking-widest uppercase bg-orange-100 dark:bg-orange-500/15 text-orange-600 dark:text-orange-400 mb-5">
-            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
-            Bangladesh's #1 Ticket Platform
-          </span>
+            {/* Startup-style Eyebrow pill */}
+            <motion.div
+              initial={{ opacity: 0, y: -12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium bg-white dark:bg-white/5 border border-stone-200/80 dark:border-white/10 shadow-sm mb-8 transition-colors cursor-default">
+                <span className="flex items-center justify-center w-4 h-4 rounded-full bg-orange-100 dark:bg-orange-500/20">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-600 dark:bg-orange-400 animate-pulse" />
+                </span>
+                <span className="text-stone-600 dark:text-stone-300">Bangladesh's #1 Ticket Platform</span>
+              </div>
+            </motion.div>
 
-          {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.08] tracking-tight text-stone-900 dark:text-stone-50 mb-5">
-            Your Journey{" "}
-            <span className="relative inline-block">
-              <span className="relative z-10 text-orange-600 dark:text-orange-500">
-                Starts Here
+            {/* Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.1 }}
+              className="text-5xl sm:text-6xl lg:text-[5rem] font-extrabold tracking-tighter text-stone-900 dark:text-white mb-6 leading-[1.05]"
+            >
+              <span className="block mb-2">
+                <TypingAnimation>Your Journey</TypingAnimation>
               </span>
-              {/* Underline squiggle */}
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 220 10"
-                className="absolute -bottom-2 left-0 w-full"
-                preserveAspectRatio="none"
+              <span className="relative inline-block text-transparent bg-clip-text bg-gradient-to-r from-orange-600 via-orange-500 to-rose-500 dark:from-orange-400 dark:via-orange-300 dark:to-rose-400 pb-3">
+                <TypingAnimation delay={1300}>Starts Here.</TypingAnimation>
+              </span>
+            </motion.h1>
+
+            {/* Sub-copy */}
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-base sm:text-lg text-stone-500 dark:text-stone-400 max-w-lg mb-10 leading-relaxed font-medium"
+            >
+              Book bus, train, launch &amp; flight tickets instantly.
+              Compare routes, pick your seat, and travel with confidence.
+            </motion.p>
+
+            {/* CTA buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.28 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14 w-full sm:w-auto"
+            >
+              <Link
+                href="/alltickets"
+                className="no-underline w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-full bg-orange-600 dark:bg-orange-500 hover:bg-orange-700 dark:hover:bg-orange-600 text-white font-semibold text-sm transition-all shadow-[0_8px_30px_rgb(234,88,12,0.25)] dark:shadow-[0_8px_30px_rgb(234,88,12,0.15)] hover:shadow-[0_8px_30px_rgb(234,88,12,0.4)] dark:hover:shadow-[0_8px_30px_rgb(234,88,12,0.3)] hover:-translate-y-0.5 group"
               >
-                <path
-                  d="M2 7 Q55 2 110 6 Q165 10 218 4"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  fill="none"
-                  className="text-orange-400 dark:text-orange-600"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </span>
-          </h1>
+                Browse All Tickets
+                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </motion.div>
 
-          <p className="text-base sm:text-lg text-stone-500 dark:text-stone-400 max-w-md mx-auto lg:mx-0 mb-10 leading-relaxed">
-            Book bus, train, launch &amp; flight tickets instantly. Compare routes, choose
-            your seat, and travel with confidence — all in one place.
-          </p>
-
-          {/* Stats row */}
-          <div className="flex items-center justify-center lg:justify-start gap-6 sm:gap-10">
-            {STATS.map((s, i) => (
-              <div key={s.label} className="flex items-center gap-3 sm:gap-4">
-                {i !== 0 && (
-                  <div className="h-8 w-px bg-stone-200 dark:bg-neutral-800" />
-                )}
-                <div>
-                  <div className="text-2xl font-extrabold text-stone-900 dark:text-stone-50 tracking-tight leading-none">
-                    {s.value}
-                  </div>
-                  <div className="text-xs text-stone-400 dark:text-stone-500 mt-0.5">
-                    {s.label}
+            {/* Stats card with theme-aware glowing effect */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.38 }}
+              className="relative flex items-center justify-center gap-6 sm:gap-10 px-8 py-5 rounded-3xl bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl border border-stone-200/50 dark:border-neutral-800/80 shadow-[0_0_40px_-10px_rgba(234,88,12,0.2)] dark:shadow-[0_0_30px_-10px_rgba(234,88,12,0.05)] transition-all duration-500 hover:shadow-[0_0_50px_-10px_rgba(234,88,12,0.25)] dark:hover:shadow-[0_0_40px_-10px_rgba(234,88,12,0.07)]"
+            >
+              {STATS.map((s, i) => (
+                <div key={s.label} className="flex items-center gap-6 sm:gap-10 z-10">
+                  {i !== 0 && <div className="h-10 w-px bg-stone-200/80 dark:bg-neutral-800/80" />}
+                  <div className="text-center">
+                    <div className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-50 tracking-tighter leading-none">
+                      {s.value}
+                    </div>
+                    <div className="text-[11px] sm:text-xs font-semibold text-stone-500 dark:text-stone-400 mt-1.5 uppercase tracking-widest">
+                      {s.label}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </motion.div>
           </div>
-        </div>
 
-        {/* ── RIGHT: Ticket-stub search card ── */}
-        <div className="w-full lg:w-[440px] shrink-0">
-          <div
-            className="relative bg-white dark:bg-neutral-900 rounded-2xl border border-stone-200 dark:border-neutral-800 shadow-xl dark:shadow-black/40"
-            style={{ animation: "tlFloat 4s ease-in-out infinite" }}
+          {/* ── BOTTOM: Visual static card display (Balanced 2-column layout) ── */}
+          <motion.div
+            initial={{ opacity: 0, y: 32 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.45, type: "spring", stiffness: 160, damping: 22 }}
+            className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-5 pointer-events-none select-none"
           >
 
-            {/* Perforated top edge — ticket stub detail */}
-            <div
-              aria-hidden="true"
-              className="absolute -top-[5px] left-0 right-0 h-[10px]"
-              style={{
-                backgroundImage:
-                  "radial-gradient(circle at center, #fff 3.2px, transparent 3.4px)",
-                backgroundSize: "16px 10px",
-                backgroundRepeat: "repeat-x",
-                backgroundPosition: "4px 0",
-              }}
-            />
-            <style>{`
-              @keyframes tlFloat {
-                0%, 100% { transform: translateY(0px); }
-                50%       { transform: translateY(-8px); }
-              }
-              .dark .tl-perf-top {
-                background-image: radial-gradient(circle at center, #171717 3.2px, transparent 3.4px) !important;
-              }
-              @media (prefers-reduced-motion: reduce) {
-                [style*="tlFloat"] { animation: none !important; }
-              }
-            `}</style>
-
-            {/* Transport tabs */}
-            <div className="flex border-b border-stone-100 dark:border-neutral-800 px-4 pt-4 gap-1">
-              {TRANSPORT_TABS.map(({ key, label, icon: Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveTab(key)}
-                  className={[
-                    "flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-sm font-medium transition-colors",
-                    activeTab === key
-                      ? "bg-orange-600 dark:bg-orange-500 text-orange-50"
-                      : "text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-neutral-800",
-                  ].join(" ")}
-                >
-                  <Icon size={14} />
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {/* Search fields */}
-            <div className="p-5 flex flex-col gap-4">
-
-              {/* From / To with swap */}
-              <div className="relative flex flex-col gap-3">
-                {/* From */}
-                <div className="flex items-center gap-3 border border-stone-200 dark:border-neutral-700 rounded-xl px-4 py-3 bg-stone-50 dark:bg-neutral-800 focus-within:ring-2 focus-within:ring-orange-500">
-                  <MapPin size={16} className="text-orange-500 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[10px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-0.5">
-                      From
-                    </div>
-                    <input
-                      type="text"
-                      value={from}
-                      onChange={(e) => setFrom(e.target.value)}
-                      placeholder="Departure city"
-                      className="w-full bg-transparent text-sm font-medium text-stone-900 dark:text-stone-50 placeholder-stone-400 dark:placeholder-stone-600 outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Swap button */}
-                <button
-                  type="button"
-                  onClick={handleSwap}
-                  title="Swap cities"
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-8 h-8 rounded-full bg-orange-600 dark:bg-orange-500 text-orange-50 shadow-md hover:bg-orange-700 dark:hover:bg-orange-600 transition-colors"
-                >
-                  <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <path d="M4 3v10M4 13l-2-2M4 13l2-2M12 13V3M12 3l-2 2M12 3l2 2" />
-                  </svg>
-                </button>
-
-                {/* To */}
-                <div className="flex items-center gap-3 border border-stone-200 dark:border-neutral-700 rounded-xl px-4 py-3 bg-stone-50 dark:bg-neutral-800 focus-within:ring-2 focus-within:ring-orange-500">
-                  <MapPin size={16} className="text-stone-400 dark:text-stone-500 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[10px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-0.5">
-                      To
-                    </div>
-                    <input
-                      type="text"
-                      value={to}
-                      onChange={(e) => setTo(e.target.value)}
-                      placeholder="Destination city"
-                      className="w-full bg-transparent text-sm font-medium text-stone-900 dark:text-stone-50 placeholder-stone-400 dark:placeholder-stone-600 outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Date */}
-              <div className="flex items-center gap-3 border border-stone-200 dark:border-neutral-700 rounded-xl px-4 py-3 bg-stone-50 dark:bg-neutral-800 focus-within:ring-2 focus-within:ring-orange-500">
-                <Calendar size={16} className="text-orange-500 shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <div className="text-[10px] font-semibold text-stone-400 dark:text-stone-500 uppercase tracking-wider mb-0.5">
-                    Date
-                  </div>
-                  <input
-                    type="date"
-                    value={date}
-                    min={today}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full bg-transparent text-sm font-medium text-stone-900 dark:text-stone-50 outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Search button */}
-              <button
-                type="button"
-                className="w-full flex items-center justify-center gap-2 bg-orange-600 dark:bg-orange-500 hover:bg-orange-700 dark:hover:bg-orange-600 text-orange-50 font-semibold py-3.5 rounded-xl transition-colors shadow-md shadow-orange-200 dark:shadow-orange-900/30"
-              >
-                <Search size={17} />
-                Search Tickets
-                <ArrowRight size={16} />
-              </button>
-
-              {/* Trust note */}
-              <p className="text-center text-[11px] text-stone-400 dark:text-stone-500 -mt-1">
-                Free cancellation on most routes · Instant confirmation
+            {/* Static Transport mode pills card (Unclickable) */}
+            <div className="bg-white dark:bg-neutral-900/80 border border-stone-200/80 dark:border-neutral-800/80 rounded-2xl p-6 shadow-sm flex flex-col justify-center">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-stone-400 dark:text-stone-500 mb-4">
+                We cover all modes
               </p>
+              <div className="grid grid-cols-2 gap-3">
+                {TRANSPORT.map(({ icon: Icon, label, color }) => (
+                  <div
+                    key={label}
+                    className={`flex flex-col items-center gap-2 py-4 rounded-xl text-xs font-semibold border ${color}`}
+                  >
+                    <Icon size={22} />
+                    {label}
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Perforated bottom edge — ticket stub detail */}
-            <div
-              aria-hidden="true"
-              className="absolute -bottom-[5px] left-0 right-0 h-[10px]"
-              style={{
-                backgroundImage:
-                  "radial-gradient(circle at center, #fff 3.2px, transparent 3.4px)",
-                backgroundSize: "16px 10px",
-                backgroundRepeat: "repeat-x",
-                backgroundPosition: "4px 0",
-              }}
-            />
-          </div>
+            {/* Static Review snippet card (Unclickable) */}
+            <div className="bg-gradient-to-br from-orange-500 to-orange-600 dark:from-orange-500 dark:to-orange-700 rounded-2xl p-6 shadow-[0_8px_30px_rgb(234,88,12,0.2)] dark:shadow-[0_8px_30px_rgb(234,88,12,0.1)] flex flex-col justify-center">
+              <div className="flex items-center gap-1 mb-4">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} size={13} className="text-white fill-white" />
+                ))}
+                <span className="text-orange-50 text-xs font-bold ml-1">4.9 / 5</span>
+              </div>
+              <div className="flex flex-col gap-3.5">
+                {REVIEWS.map(({ name, text }) => (
+                  <div key={name} className="flex gap-2.5">
+                    <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+                      {name[0]}
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-extrabold text-white">{name}</p>
+                      <p className="text-[11px] text-orange-50/90 leading-relaxed font-medium">{text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+          </motion.div>
         </div>
       </div>
 
-      {/* ── Bottom wave divider ── */}
+      {/* ── Bottom wave ── */}
       <div aria-hidden="true" className="relative h-12 -mb-1">
         <svg
           viewBox="0 0 1440 48"

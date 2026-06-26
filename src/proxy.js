@@ -25,6 +25,6 @@ export const config = {
    matcher: [
     '/dashboard/:role*',
     '/dashboard/:role*/:nav*',
-    '/tickets/:id*'
+    '/tickets/(.*)'
   ],
 };
