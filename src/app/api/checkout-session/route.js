@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
 // Initialize Stripe with your private secret key securely on the server
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY);
 
 export async function POST(request) {
   try {
@@ -34,7 +34,7 @@ export async function POST(request) {
       ],
       mode: "payment",
       // Stripe will send the user back here
-      success_url: `${process.env.NEXT_PUBLIC_URL}/success?session_id={}`,
+      success_url: `${process.env.NEXT_PUBLIC_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL}/cancel`,
     });
 

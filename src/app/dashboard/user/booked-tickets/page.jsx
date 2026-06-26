@@ -168,7 +168,7 @@ function BookingCard({ booking, onPayNow, isPaying }) {
 
         {/* Actions Slot pinned down */}
         <div className="mt-auto pt-1 w-full min-w-0">
-          {booking.status === "accepted" && !isExpired ? (
+          {booking.status === "accepted" && !isExpired && booking.isPaid === false ? (
             <button
               onClick={() => onPayNow(booking)}
               disabled={isPaying}
@@ -177,12 +177,12 @@ function BookingCard({ booking, onPayNow, isPaying }) {
               {isPaying ? <Loader2 size={14} className="animate-spin shrink-0" /> : <CreditCard size={14} className="shrink-0" />}
               <span className="truncate">{isPaying ? "Redirecting…" : `Pay ৳${booking.totalPrice?.toLocaleString()}`}</span>
             </button>
-          ) : booking.status === "accepted" && isExpired ? (
+          ) : booking.status === "accepted" && isExpired && booking.isPaid !== true? (
             <div className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-stone-100 dark:bg-neutral-800 text-stone-400 dark:text-stone-500 text-sm font-medium border border-stone-200 dark:border-neutral-700 whitespace-nowrap overflow-hidden px-2">
               <XCircle size={14} className="shrink-0" />
               <span className="truncate">Payment window closed</span>
             </div>
-          ) : booking.status === "paid" ? (
+          ) : booking.isPaid === true ? (
             <div className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm font-semibold ring-1 ring-blue-200 dark:ring-blue-500/30 whitespace-nowrap overflow-hidden px-2">
               <BadgeCheck size={14} className="shrink-0" />
               <span className="truncate">Payment complete</span>
@@ -255,7 +255,7 @@ export default function MyBookedTickets() {
     setPayingId(booking._id);
     try {
       // 1. Call our secure Next.js API endpoint
-      const response = await fetch("/api/checkout", {
+      const response = await fetch("/api/checkout-session", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -270,6 +270,7 @@ export default function MyBookedTickets() {
       });
 
       const data = await response.json();
+      console.log(data)
 
       if (data.url) {
         // 2. Redirect the user safely to Stripe Checkout
@@ -285,14 +286,27 @@ export default function MyBookedTickets() {
     }
   };
 
+ // 1. FIXED COUNTS LOGIC
   const counts = TABS.reduce((acc, t) => {
-    acc[t] = t === "all" ? bookings.length : bookings.filter((b) => b.status === t).length;
+    if (t === "all") {
+      acc[t] = bookings.length;
+    } else if (t === "paid") {
+      acc[t] = bookings.filter((b) => b.isPaid === true).length;
+    } else {
+      // For pending, accepted, and rejected, exclude them if they are already paid
+      acc[t] = bookings.filter((b) => b.status === t && !b.isPaid).length;
+    }
     return acc;
   }, {});
 
-  const filtered = filter === "all"
-    ? bookings
-    : bookings.filter((b) => b.status === filter);
+  // 2. FIXED FILTERING LOGIC
+  const filtered = bookings.filter((b) => {
+    if (filter === "all") return true;
+    if (filter === "paid") return b.isPaid === true;
+    
+    // Only show the status matches if the ticket hasn't been paid yet
+    return b.status === filter && !b.isPaid;
+  });
 
   if (sessionPending) {
     return (
@@ -317,7 +331,7 @@ export default function MyBookedTickets() {
         </div>
 
         {/* Horizontal Navigation tabs area */}
-        <div className="flex flex-wrap items-center gap-2  pb-3 mb-6  w-full max-w-full box-border">
+        <div className="flex flex-wrap items-center gap-2 pb-3 mb-6 w-full max-w-full box-border">
           {TABS.map((tab) => {
             const active = filter === tab;
             const s = STATUS[tab];

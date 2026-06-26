@@ -27,7 +27,7 @@ const FILTER_TABS = ["all", "pending", "approved", "rejected"];
 export default function ManageTickets() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("pending");
+  const [filter, setFilter] = useState("all");
   const [actionId, setActionId] = useState(null);
 
   useEffect(() => {
