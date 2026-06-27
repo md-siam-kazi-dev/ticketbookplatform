@@ -16,7 +16,7 @@ export async function GET(request) {
     }
 
     // 3. Defensive check: Ensure your Stripe Key is loaded
-    if (!process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY) {
+    if (!process.env.STRIPE_SECRET_KEY) {
       console.error("❌ STRIPE_SECRET_KEY is missing from your .env file!");
       return NextResponse.json(
         { error: "Internal server configuration error" },
@@ -25,7 +25,7 @@ export async function GET(request) {
     }
 
     // 4. Initialize Stripe inside the handler to prevent initialization crashes
-    const stripe = new Stripe(process.env.NEXT_PUBLIC_STRIPE_SECRET_KEY);
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
     // 5. Fetch the session from Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId);

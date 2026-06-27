@@ -13,15 +13,6 @@ import Link from "next/link";
 
 /**
  * TicketLagbe — Vendor: Overview / Dashboard Home
- *
- * Demo data below — swap `overview` for your server fetch when ready:
- *   const overview = await getVendorOverview();
- *
- * Expected shape:
- * {
- *   totalTickets, pendingTickets, approvedTickets, rejectedTickets,
- *   requestedBookings, totalSold, totalRevenue
- * }
  */
 
 const DEMO_DATA = {
@@ -35,7 +26,7 @@ const DEMO_DATA = {
 };
 
 const DEMO_RECENT_BOOKINGS = [
-  { id: "b001", user: "Arif Hossain",    ticket: "Dhaka to Chattogram AC Bus", qty: 2, total: 2400,  status: "pending"  },
+  { id: "b001", user: "Arif Hossain",    ticket: "Dhaka to Chattogram AC Bus Legen Track Premium Extra Long Name Route", qty: 2, total: 2400,  status: "pending"  },
   { id: "b002", user: "Nusrat Jahan",    ticket: "Dhaka to Sylhet Non-AC Bus",  qty: 1, total: 700,   status: "pending"  },
   { id: "b003", user: "Tanvir Ahmed",    ticket: "Dhaka to Khulna Train",       qty: 3, total: 2850,  status: "accepted" },
   { id: "b004", user: "Sadia Islam",     ticket: "Dhaka to Barisal Launch",     qty: 2, total: 1300,  status: "pending"  },
@@ -171,9 +162,9 @@ export default function VendorOverview({ overview = DEMO_DATA, recentBookings = 
           </Link>
         </div>
 
-        <div className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl overflow-hidden">
+        <div className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl overflow-hidden shadow-sm">
 
-          {/* Desktop table */}
+          {/* 💻 Desktop table */}
           <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -185,26 +176,29 @@ export default function VendorOverview({ overview = DEMO_DATA, recentBookings = 
                   <th className="text-center font-semibold text-stone-500 dark:text-stone-400 px-5 py-3 whitespace-nowrap">Status</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-stone-100 dark:divide-neutral-800">
                 {recentBookings.map((b) => (
                   <tr
                     key={b.id}
-                    className="border-b border-stone-100 dark:border-neutral-800 last:border-0 hover:bg-stone-50 dark:hover:bg-neutral-800/40 transition-colors"
+                    className="hover:bg-stone-50 dark:hover:bg-neutral-800/40 transition-colors"
                   >
                     <td className="px-5 py-3 font-medium text-stone-900 dark:text-stone-50 whitespace-nowrap">
                       {b.user}
                     </td>
-                    <td className="px-4 py-3 text-stone-500 dark:text-stone-400 truncate max-w-[200px]">
-                      {b.ticket}
+                    {/* Fixed: Extracted text elements inside a layout-bounded block wrapper container */}
+                    <td className="px-4 py-3 max-w-[240px]">
+                      <div className="text-stone-500 dark:text-stone-400 truncate w-full" title={b.ticket}>
+                        {b.ticket}
+                      </div>
                     </td>
-                    <td className="px-4 py-3 text-center text-stone-700 dark:text-stone-300">
+                    <td className="px-4 py-3 text-center text-stone-700 dark:text-stone-300 whitespace-nowrap">
                       ×{b.qty}
                     </td>
                     <td className="px-4 py-3 text-right font-semibold text-stone-900 dark:text-stone-50 whitespace-nowrap">
                       ৳{b.total.toLocaleString()}
                     </td>
-                    <td className="px-5 py-3 text-center">
-                      <span className={["inline-block px-2.5 py-1 rounded-full text-xs font-semibold capitalize border", BOOKING_STATUS_STYLES[b.status]].join(" ")}>
+                    <td className="px-5 py-3 text-center whitespace-nowrap">
+                      <span className={["inline-flex px-2.5 py-1 rounded-full text-xs font-semibold capitalize border", BOOKING_STATUS_STYLES[b.status]].join(" ")}>
                         {b.status}
                       </span>
                     </td>
@@ -214,18 +208,21 @@ export default function VendorOverview({ overview = DEMO_DATA, recentBookings = 
             </table>
           </div>
 
-          {/* Mobile cards */}
+          {/* 📱 Mobile cards */}
           <div className="sm:hidden divide-y divide-stone-100 dark:divide-neutral-800">
             {recentBookings.map((b) => (
               <div key={b.id} className="p-4 flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold text-stone-900 dark:text-stone-50 text-sm">{b.user}</p>
-                  <span className={["px-2.5 py-1 rounded-full text-[11px] font-semibold capitalize border", BOOKING_STATUS_STYLES[b.status]].join(" ")}>
+                <div className="flex items-center justify-between gap-4">
+                  <p className="font-semibold text-stone-900 dark:text-stone-50 text-sm truncate">{b.user}</p>
+                  <span className={["px-2.5 py-1 rounded-full text-[11px] font-semibold capitalize border shrink-0", BOOKING_STATUS_STYLES[b.status]].join(" ")}>
                     {b.status}
                   </span>
                 </div>
-                <p className="text-xs text-stone-500 dark:text-stone-400">{b.ticket}</p>
-                <div className="flex items-center justify-between text-sm">
+                {/* Fixed: Applied bounding utilities to guarantee overflow isolation across small touchscreens */}
+                <p className="text-xs text-stone-500 dark:text-stone-400 truncate w-full" title={b.ticket}>
+                  {b.ticket}
+                </p>
+                <div className="flex items-center justify-between text-sm pt-0.5">
                   <span className="text-stone-400 dark:text-stone-500">Qty: <span className="font-medium text-stone-700 dark:text-stone-300">×{b.qty}</span></span>
                   <span className="font-bold text-stone-900 dark:text-stone-50">৳{b.total.toLocaleString()}</span>
                 </div>
