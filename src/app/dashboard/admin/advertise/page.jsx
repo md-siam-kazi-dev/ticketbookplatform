@@ -90,21 +90,21 @@ export default function AdminAdManagement() {
   };
 
   return (
-    <div className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl overflow-hidden w-full  box-border">
+    <div className="w-full max-w-full overflow-hidden rounded-2xl border border-stone-200 bg-white box-border dark:border-neutral-800 dark:bg-neutral-900">
       {/* Header section matching platform core styling layout */}
-      <div className="flex flex-col xl:flex-row  sm:justify-between gap-4 px-4  py-5 border-b border-stone-200 dark:border-neutral-800 w-full max-w-full overflow-hidden">
+      <div className="flex w-full flex-col gap-4 border-b border-stone-200 px-4 py-5 sm:flex-row sm:items-center sm:justify-between dark:border-neutral-800">
         <div className="min-w-0">
-          <h1 className="text-left sm:text-lg font-bold text-stone-900 dark:text-stone-50 truncate">
+          <h1 className="truncate text-left font-bold text-stone-900 sm:text-lg dark:text-stone-50">
             Campaign Advertisements
           </h1>
-          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-0.5 truncate">
+          <p className="mt-0.5 truncate text-xs text-stone-500 sm:text-sm dark:text-stone-400">
             Promote up to 6 approved items directly onto your home display banners.
           </p>
         </div>
-        <div className="shrink-0">
-          <span className="flex flex-col xxl:flex-row items-center gap-1.5 px-3 py-1.5  rounded-xl bg-stone-100 dark:bg-neutral-800 text-xs font-semibold text-stone-700 dark:text-stone-300">
+        <div className="shrink-0 self-start sm:self-auto">
+          <span className="flex items-center gap-1.5 rounded-xl bg-stone-100 px-3 py-1.5 text-xs font-semibold text-stone-700 dark:bg-neutral-800 dark:text-stone-300">
             Advertising:{" "}
-            <span className={adCount >= 6 ? "text-red-500 font-bold" : "text-orange-600 font-bold"}>
+            <span className={adCount >= 6 ? "font-bold text-red-500" : "font-bold text-orange-600"}>
               {adCount}/6
             </span>
           </span>
@@ -114,7 +114,7 @@ export default function AdminAdManagement() {
       {/* Loading state rendered inline */}
       {loading && (
         <div className="px-6 py-16 text-center text-stone-400 dark:text-stone-500">
-          <Loader2 size={20} className="animate-spin mx-auto mb-2 text-orange-600" />
+          <Loader2 size={20} className="mx-auto mb-2 animate-spin text-orange-600" />
           Loading tickets...
         </div>
       )}
@@ -128,8 +128,8 @@ export default function AdminAdManagement() {
 
       {!loading && tickets.length > 0 && (
         <>
-          {/* ── MOBILE & TABLET COMPACT CARDS RESPONSIVE GRID (Below lg breakpoints) ── */}
-          <div className="xl:hidden grid grid-cols-1 md:grid-cols-1 gap-4 p-4 bg-stone-50/50 dark:bg-neutral-950/20 w-full max-w-full">
+          {/* ── MOBILE & TABLET COMPACT CARDS RESPONSIVE GRID (Below xl breakpoint) ── */}
+          <div className="grid w-full grid-cols-1 gap-4 bg-stone-50/50 p-4 sm:grid-cols-2 xl:hidden dark:bg-neutral-950/20">
             {tickets.map((ticket) => {
               const isMaxLimitReached = adCount >= 6;
               const isDisabled = togglingId === ticket._id || (isMaxLimitReached && !ticket.isAd);
@@ -137,33 +137,33 @@ export default function AdminAdManagement() {
               return (
                 <div
                   key={ticket._id}
-                  className="p-4 sm:p-5 flex flex-col justify-between gap-4 bg-white dark:bg-neutral-900 border border-stone-100 dark:border-neutral-800/80 rounded-xl shadow-sm min-w-0 overflow-hidden"
+                  className="flex min-w-0 flex-col justify-between gap-4 overflow-hidden rounded-xl border border-stone-100 bg-white p-4 shadow-sm dark:border-neutral-800/80 dark:bg-neutral-900 sm:p-5"
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-semibold text-stone-900 dark:text-stone-50 text-sm sm:text-base line-clamp-1 min-w-0 flex-1">
+                      <h3 className="line-clamp-1 min-w-0 flex-1 text-sm font-semibold text-stone-900 sm:text-base dark:text-stone-50">
                         {ticket.title}
                       </h3>
-                      <span className="shrink-0 px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 text-[11px] font-semibold capitalize whitespace-nowrap">
+                      <span className="shrink-0 whitespace-nowrap rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold capitalize text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400">
                         {ticket.transportType}
                       </span>
                     </div>
 
-                    <div className="mt-4 space-y-1.5 text-xs text-stone-500 dark:text-stone-400 min-w-0">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <MapPin className="w-3.5 h-3.5 text-orange-600 shrink-0" />
+                    <div className="mt-4 space-y-1.5 min-w-0 text-xs text-stone-500 dark:text-stone-400">
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5 shrink-0 text-orange-600" />
                         <span className="truncate">
                           {ticket.from} &rarr; {ticket.to}
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <Tag className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 shrink-0" />
+                        <Tag className="h-3.5 w-3.5 shrink-0 text-stone-400 dark:text-stone-500" />
                         <span className="font-semibold text-stone-900 dark:text-stone-200">
                           ${ticket.price}
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <Armchair className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 shrink-0" />
+                        <Armchair className="h-3.5 w-3.5 shrink-0 text-stone-400 dark:text-stone-500" />
                         <span className="truncate">{ticket.quantity} spaces left</span>
                       </div>
                     </div>
@@ -173,10 +173,10 @@ export default function AdminAdManagement() {
                     type="button"
                     disabled={isDisabled}
                     onClick={() => handleToggleAdvertise(ticket._id, ticket.isAd)}
-                    className={`w-full flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm whitespace-nowrap ${
+                    className={`flex w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-2 text-xs font-semibold shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                       ticket.isAd
                         ? "bg-orange-600 text-white hover:bg-orange-700"
-                        : "bg-white text-stone-700 border border-stone-200 hover:bg-stone-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                        : "border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
                     }`}
                   >
                     {togglingId === ticket._id ? (
@@ -198,20 +198,20 @@ export default function AdminAdManagement() {
             })}
           </div>
 
-          {/* ── DESKTOP TABULAR VIEW MATRIX (Visible from lg breakpoints up) ── */}
-          <div className="hidden xl:block overflow-x-auto w-full max-w-full left-0 right-0">
-            <table className="w-full text-sm table-auto border-collapse">
+          {/* ── DESKTOP TABULAR VIEW MATRIX (Visible from xl breakpoint up) ── */}
+          <div className="hidden w-full overflow-x-auto xl:block">
+            <table className="w-full table-auto border-collapse text-sm">
               <thead>
-                <tr className="border-b border-stone-200 dark:border-neutral-800 bg-stone-50 dark:bg-neutral-800/50 text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                  <th className="text-left px-6 py-3.5 whitespace-nowrap">Title</th>
-                  <th className="text-left px-4 py-3.5 whitespace-nowrap">Route</th>
-                  <th className="text-left px-4 py-3.5 whitespace-nowrap">Type</th>
-                  <th className="text-left px-4 py-3.5 whitespace-nowrap">Price</th>
-                  <th className="text-left px-4 py-3.5 whitespace-nowrap">Available Space</th>
-                  <th className="text-center px-6 py-3.5 whitespace-nowrap">Action</th>
+                <tr className="border-b border-stone-200 bg-stone-50 text-xs font-semibold uppercase tracking-wider text-stone-500 dark:border-neutral-800 dark:bg-neutral-800/50 dark:text-stone-400">
+                  <th className="whitespace-nowrap px-6 py-3.5 text-left">Title</th>
+                  <th className="whitespace-nowrap px-4 py-3.5 text-left">Route</th>
+                  <th className="whitespace-nowrap px-4 py-3.5 text-left">Type</th>
+                  <th className="whitespace-nowrap px-4 py-3.5 text-left">Price</th>
+                  <th className="whitespace-nowrap px-4 py-3.5 text-left">Available Space</th>
+                  <th className="whitespace-nowrap px-6 py-3.5 text-center">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100 dark:divide-neutral-800 text-stone-600 dark:text-neutral-300">
+              <tbody className="divide-y divide-stone-100 text-stone-600 dark:divide-neutral-800 dark:text-neutral-300">
                 {tickets.map((ticket) => {
                   const isMaxLimitReached = adCount >= 6;
                   const isDisabled = togglingId === ticket._id || (isMaxLimitReached && !ticket.isAd);
@@ -219,35 +219,35 @@ export default function AdminAdManagement() {
                   return (
                     <tr
                       key={ticket._id}
-                      className="hover:bg-stone-50 dark:hover:bg-neutral-800/40 transition-colors"
+                      className="transition-colors hover:bg-stone-50 dark:hover:bg-neutral-800/40"
                     >
-                      <td className="px-6 py-3.5 font-medium text-stone-900 dark:text-stone-50 max-w-[200px] truncate">
+                      <td className="max-w-[200px] truncate px-6 py-3.5 font-medium text-stone-900 dark:text-stone-50">
                         {ticket.title}
                       </td>
-                      <td className="px-4 py-3.5 max-w-[180px] truncate">
+                      <td className="max-w-[180px] truncate px-4 py-3.5">
                         {ticket.from} &rarr; {ticket.to}
                       </td>
-                      <td className="px-4 py-3.5 capitalize whitespace-nowrap">
-                        <span className="inline-block px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 text-xs font-semibold">
+                      <td className="whitespace-nowrap px-4 py-3.5 capitalize">
+                        <span className="inline-block rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400">
                           {ticket.transportType}
                         </span>
                       </td>
-                      <td className="px-4 py-3.5 font-semibold text-stone-900 dark:text-stone-200 whitespace-nowrap">
+                      <td className="whitespace-nowrap px-4 py-3.5 font-semibold text-stone-900 dark:text-stone-200">
                         ${ticket.price}
                       </td>
-                      <td className="px-4 py-3.5 whitespace-nowrap">
+                      <td className="whitespace-nowrap px-4 py-3.5">
                         {ticket.quantity} seats available
                       </td>
                       <td className="px-6 py-3.5">
-                        <div className="flex items-center justify-center min-h-[32px] whitespace-nowrap">
+                        <div className="flex min-h-[32px] whitespace-nowrap items-center justify-center">
                           <button
                             type="button"
                             disabled={isDisabled}
                             onClick={() => handleToggleAdvertise(ticket._id, ticket.isAd)}
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm ${
+                            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
                               ticket.isAd
                                 ? "bg-orange-600 text-white hover:bg-orange-700"
-                                : "bg-white text-stone-700 border border-stone-200 hover:bg-stone-50 dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                                : "border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
                             }`}
                           >
                             {togglingId === ticket._id ? (
