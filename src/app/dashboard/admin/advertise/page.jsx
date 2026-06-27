@@ -135,4 +135,137 @@ export default function AdminAdManagement() {
                     <h3 className="min-w-0 flex-1 truncate text-sm font-semibold text-stone-900 dark:text-stone-50">
                       {ticket.title}
                     </h3>
-                    <span className="shrink-0 rounded-full
+                    <span className="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold capitalize text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400">
+                      {ticket.transportType}
+                    </span>
+                  </div>
+
+                  {/* Meta info */}
+                  <div className="space-y-1.5 text-xs text-stone-500 dark:text-stone-400">
+                    <div className="flex min-w-0 items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 shrink-0 text-orange-600" />
+                      {/* ↓ FIX: min-w-0 + truncate on the inner span, not just the flex parent */}
+                      <span className="min-w-0 truncate">
+                        {ticket.from} → {ticket.to}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Tag className="h-3.5 w-3.5 shrink-0 text-stone-400 dark:text-stone-500" />
+                      <span className="font-semibold text-stone-900 dark:text-stone-200">
+                        ${ticket.price}
+                      </span>
+                    </div>
+                    <div className="flex min-w-0 items-center gap-1.5">
+                      <Armchair className="h-3.5 w-3.5 shrink-0 text-stone-400 dark:text-stone-500" />
+                      <span className="min-w-0 truncate">{ticket.quantity} spaces left</span>
+                    </div>
+                  </div>
+
+                  {/* Toggle button */}
+                  <button
+                    type="button"
+                    disabled={isDisabled}
+                    onClick={() => handleToggleAdvertise(ticket._id, ticket.isAd)}
+                    className={`flex w-full min-w-0 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                      ticket.isAd
+                        ? "bg-orange-600 text-white hover:bg-orange-700"
+                        : "border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                    }`}
+                  >
+                    {togglingId === ticket._id ? (
+                      <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+                    ) : ticket.isAd ? (
+                      <>
+                        <Megaphone className="h-4 w-4 shrink-0" />
+                        <span>Advertised</span>
+                      </>
+                    ) : (
+                      <>
+                        <MegaphoneOff className="h-4 w-4 shrink-0" />
+                        <span>Advertise</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* ── DESKTOP TABLE (xl and up) ── */}
+          <div className="hidden w-full overflow-x-auto xl:block">
+            <table className="w-full table-auto border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-stone-200 bg-stone-50 text-xs font-semibold uppercase tracking-wider text-stone-500 dark:border-neutral-800 dark:bg-neutral-800/50 dark:text-stone-400">
+                  <th className="whitespace-nowrap px-6 py-3.5 text-left">Title</th>
+                  <th className="whitespace-nowrap px-4 py-3.5 text-left">Route</th>
+                  <th className="whitespace-nowrap px-4 py-3.5 text-left">Type</th>
+                  <th className="whitespace-nowrap px-4 py-3.5 text-left">Price</th>
+                  <th className="whitespace-nowrap px-4 py-3.5 text-left">Available Space</th>
+                  <th className="whitespace-nowrap px-6 py-3.5 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-stone-100 text-stone-600 dark:divide-neutral-800 dark:text-neutral-300">
+                {tickets.map((ticket) => {
+                  const isMaxLimitReached = adCount >= 6;
+                  const isDisabled =
+                    togglingId === ticket._id || (isMaxLimitReached && !ticket.isAd);
+
+                  return (
+                    <tr
+                      key={ticket._id}
+                      className="transition-colors hover:bg-stone-50 dark:hover:bg-neutral-800/40"
+                    >
+                      <td className="max-w-[200px] truncate px-6 py-3.5 font-medium text-stone-900 dark:text-stone-50">
+                        {ticket.title}
+                      </td>
+                      <td className="max-w-[180px] truncate px-4 py-3.5">
+                        {ticket.from} → {ticket.to}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3.5 capitalize">
+                        <span className="inline-block rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-400">
+                          {ticket.transportType}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3.5 font-semibold text-stone-900 dark:text-stone-200">
+                        ${ticket.price}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3.5">
+                        {ticket.quantity} seats available
+                      </td>
+                      <td className="px-6 py-3.5 text-center">
+                        <button
+                          type="button"
+                          disabled={isDisabled}
+                          onClick={() => handleToggleAdvertise(ticket._id, ticket.isAd)}
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                            ticket.isAd
+                              ? "bg-orange-600 text-white hover:bg-orange-700"
+                              : "border border-stone-200 bg-white text-stone-700 hover:bg-stone-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                          }`}
+                        >
+                          {togglingId === ticket._id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : ticket.isAd ? (
+                            <>
+                              <Megaphone className="h-3.5 w-3.5" />
+                              Advertised
+                            </>
+                          ) : (
+                            <>
+                              <MegaphoneOff className="h-3.5 w-3.5" />
+                              Advertise
+                            </>
+                          )}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
