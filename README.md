@@ -2,9 +2,7 @@
 
 **TicketLagbe** (টিকেট লাগবে) is a full-stack online ticket booking platform for Bangladesh, supporting bus, train, launch, and flight tickets. Users can search and book tickets, vendors can list and manage their routes, and admins can moderate the entire platform.
 
-🌐 **Live Site:** [https://ticketlagbe.vercel.app](https://ticketlagbe.vercel.app)  
-🖥️ **Client Repo:** [https://github.com/yourusername/ticketlagbe-client](https://github.com/yourusername/ticketlagbe-client)  
-🔧 **Server Repo:** [https://github.com/yourusername/ticketlagbe-server](https://github.com/yourusername/ticketlagbe-server)
+🌐 **Live Site:** [https://ticketlagbe.vercel.app](https://ticketbookplatform.vercel.app/)  
 
 ---
 
@@ -116,16 +114,6 @@ ticketlagbe-client/
 - imgbb API key
 
 ### 1. Clone the repositories
-
-```bash
-# Client
-git clone https://github.com/yourusername/ticketlagbe-client.git
-cd ticketlagbe-client
-
-# Server (separate terminal)
-git clone https://github.com/yourusername/ticketlagbe-server.git
-cd ticketlagbe-server
-```
 
 ### 2. Install dependencies
 
@@ -257,8 +245,6 @@ bun dev
 ## 👨‍💻 Author
 
 **Md Siam Kazi**  
-📧 [your@email.com](mailto:your@email.com)  
-🔗 [github.com/yourusername](https://github.com/yourusername)
 
 ---
 
