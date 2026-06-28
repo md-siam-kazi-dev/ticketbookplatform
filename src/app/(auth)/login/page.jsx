@@ -8,16 +8,23 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { TrainFront } from "lucide-react";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
-import { authClient } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 
 export default function Login() {
+  const {data} = useSession();
+  
   const router = useRouter();
+  if(data?.user){
+    router.push('/')
+    
+  }
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [gLoading, setGLoading] = useState(false);
 
   const handleSignIn = async (e) => {
+
     e.preventDefault();
 
     const formData = new FormData(e.target);

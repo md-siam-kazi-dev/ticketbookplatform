@@ -10,10 +10,16 @@ import { toast } from "sonner";
 
 import { Spinner } from "@/components/ui/spinner";
 import { useRouter } from "next/navigation";
-import { authClient, signUp } from "@/lib/auth-client";
+import { authClient, signUp, useSession } from "@/lib/auth-client";
 
 export default function SignUp() {
+  const {data} = useSession();
+  
 const router = useRouter()
+ if(data?.user){
+    router.push('/')
+    
+  }
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorPass, setErrorPass] = useState("");
