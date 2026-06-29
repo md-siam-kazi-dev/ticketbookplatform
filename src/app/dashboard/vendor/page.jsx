@@ -1,238 +1,161 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { authClient } from "@/lib/auth-client"; // Your explicit Better Auth client export
+import { toast } from "sonner";
 import {
   Ticket,
   Clock,
-  XCircle,
-  ClipboardList,
-  TrendingUp,
   CheckCircle2,
-  ArrowRight,
+  XCircle,
+  CalendarCheck,
+  TrendingUp,
+  DollarSign,
 } from "lucide-react";
-import Link from "next/link";
 
-/**
- * TicketLagbe — Vendor: Overview / Dashboard Home
- */
 
-const DEMO_DATA = {
-  totalTickets: 34,
-  pendingTickets: 5,
-  approvedTickets: 24,
-  rejectedTickets: 5,
-  requestedBookings: 12,
-  totalSold: 186,
-  totalRevenue: 223200,
-};
 
-const DEMO_RECENT_BOOKINGS = [
-  { id: "b001", user: "Arif Hossain",    ticket: "Dhaka to Chattogram AC Bus Legen Track Premium Extra Long Name Route", qty: 2, total: 2400,  status: "pending"  },
-  { id: "b002", user: "Nusrat Jahan",    ticket: "Dhaka to Sylhet Non-AC Bus",  qty: 1, total: 700,   status: "pending"  },
-  { id: "b003", user: "Tanvir Ahmed",    ticket: "Dhaka to Khulna Train",       qty: 3, total: 2850,  status: "accepted" },
-  { id: "b004", user: "Sadia Islam",     ticket: "Dhaka to Barisal Launch",     qty: 2, total: 1300,  status: "pending"  },
-  { id: "b005", user: "Rakib Hasan",     ticket: "Dhaka to Rajshahi Express",   qty: 1, total: 800,   status: "rejected" },
-];
+export default function VendorDashboardOverview() {
+  // Better Auth client session state hook hook signature
+  const { data: session, isPending } = authClient.useSession();
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-const BOOKING_STATUS_STYLES = {
-  pending:  "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border-amber-200 dark:border-amber-500/20",
-  accepted: "bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400 border-green-200 dark:border-green-500/20",
-  rejected: "bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400 border-red-200 dark:border-red-500/20",
-};
+  useEffect(() => {
+    // Hold fetching sequence while Better Auth finishes background validation
+    if (isPending) return;
 
-const STAT_CARDS = [
-  {
-    key: "totalTickets",
-    label: "Total Tickets",
-    icon: Ticket,
-    accent: "bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400",
-    href: "/dashboard/vendor/my-tickets",
-  },
-  {
-    key: "pendingTickets",
-    label: "Pending Approval",
-    icon: Clock,
-    accent: "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400",
-    href: "/dashboard/vendor/my-tickets",
-  },
-  {
-    key: "rejectedTickets",
-    label: "Rejected Tickets",
-    icon: XCircle,
-    accent: "bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400",
-    href: "/dashboard/vendor/my-tickets",
-  },
-  {
-    key: "requestedBookings",
-    label: "Requested Bookings",
-    icon: ClipboardList,
-    accent: "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400",
-    href: "/dashboard/vendor/requested-bookings",
-  },
-];
+    const fetchOverviewData = async () => {
+      // Better Auth structures the payload under session.user
+      const email = session?.user?.email;
+      
+      if (!email) {
+        // Fallback to static metrics smoothly if no active session is detected
+        setStats(DEMO_DATA);
+        setLoading(false);
+        return;
+      }
 
-export default function VendorOverview({ overview = DEMO_DATA, recentBookings = DEMO_RECENT_BOOKINGS }) {
+      try {
+        const {data:tokenData} = await authClient.token();
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API}/api/vendoroverview/${email}`,{
+          headers:{
+            'Authorization':`bekd ${tokenData.token}`
+
+          }
+        } ,{
+          cache: "no-store",
+        });
+        
+        if (!res.ok) throw new Error("Server metrics error");
+        
+        const data = await res.json();
+        setStats(data.success ? data.overview : data);
+      } catch (err) {
+        toast.error("Failed to load live server metrics. Displaying offline demo statistics.");
+        setStats(DEMO_DATA);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOverviewData();
+  }, [session, isPending]);
+
+  const isLoading = loading || isPending;
+
   return (
-    <div className="flex flex-col gap-8">
-
-      {/* Page heading */}
+    <div className="w-full space-y-6">
+      
+      {/* ── HEADER ── */}
       <div>
-        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-50">
-          Overview
+        <h1 className="text-xl font-bold tracking-tight text-stone-900 sm:text-2xl dark:text-stone-50">
+          Dashboard Overview
         </h1>
-        <p className="text-sm text-stone-500 dark:text-stone-400 mt-1">
-          Your ticket performance and booking requests at a glance
+        <p className="mt-1 text-xs text-stone-500 sm:text-sm dark:text-stone-400">
+          Real-time metrics, product performance tracking, and generated revenue summaries.
         </p>
       </div>
 
-      {/* ── Top revenue banner ── */}
-      <div className="relative overflow-hidden rounded-2xl bg-orange-600 dark:bg-orange-600 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-0 justify-between">
-        {/* Dot texture */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
-            backgroundSize: "20px 20px",
-          }}
-        />
-        <div className="relative z-10">
-          <p className="text-orange-100 text-sm font-medium mb-1">Total Revenue</p>
-          <p className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-            ৳{overview.totalRevenue?.toLocaleString() ?? "—"}
-          </p>
-          <p className="text-orange-200 text-sm mt-1.5 flex items-center gap-1.5">
-            <TrendingUp size={14} />
-            {overview.totalSold?.toLocaleString()} tickets sold total
-          </p>
-        </div>
-        <div className="relative z-10 flex items-center gap-3 sm:flex-col sm:items-end">
-          <div className="bg-white/15 rounded-xl px-4 py-2.5 text-center">
-            <p className="text-white font-extrabold text-xl leading-none">{overview.approvedTickets}</p>
-            <p className="text-orange-100 text-xs mt-1">Active Tickets</p>
-          </div>
-          <CheckCircle2 size={32} className="text-orange-300 hidden sm:block" />
-        </div>
-      </div>
-
-      {/* ── 4 Stat cards ── */}
-      <section>
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-400 dark:text-stone-500 mb-3">
-          Ticket Summary
-        </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {STAT_CARDS.map(({ key, label, icon: Icon, accent, href }) => (
-            <Link
-              key={key}
-              href={href}
-              className="group bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 hover:border-orange-200 dark:hover:border-orange-500/30 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 transition-colors no-underline"
+      {/* ── STATS GRID ── */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {isLoading ? (
+          // Tailwind Motion Skeleton Blocks matching data layout footprint
+          Array.from({ length: 7 }).map((_, idx) => (
+            <div 
+              key={idx} 
+              className="animate-pulse rounded-2xl border border-stone-200/60 bg-white p-5 dark:border-neutral-800/60 dark:bg-neutral-900"
             >
               <div className="flex items-center justify-between">
-                <span className={["flex items-center justify-center w-9 h-9 rounded-xl shrink-0", accent].join(" ")}>
-                  <Icon size={18} strokeWidth={2.2} />
-                </span>
-                <ArrowRight
-                  size={14}
-                  className="text-stone-300 dark:text-stone-600 group-hover:text-orange-500 transition-colors"
-                />
+                <div className="h-4 w-24 rounded bg-stone-200 dark:bg-neutral-800" />
+                <div className="h-8 w-8 rounded-xl bg-stone-200 dark:bg-neutral-800" />
               </div>
-              <div>
-                <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900 dark:text-stone-50 leading-none">
-                  {overview[key]?.toLocaleString() ?? "—"}
-                </p>
-                <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1.5">
-                  {label}
-                </p>
-              </div>
-            </Link>
-          ))}
+              <div className="mt-4 h-7 w-16 rounded bg-stone-200 dark:bg-neutral-800" />
+            </div>
+          ))
+        ) : (
+          // Live Loaded Components
+          <>
+            <StatCard
+              title="Total Inventory Items"
+              value={stats?.totalTickets}
+              icon={<Ticket className="h-5 w-5 text-blue-500" />}
+            />
+            <StatCard
+              title="Pending Approval"
+              value={stats?.pendingTickets}
+              icon={<Clock className="h-5 w-5 text-amber-500" />}
+            />
+            <StatCard
+              title="Approved Items"
+              value={stats?.approvedTickets}
+              icon={<CheckCircle2 className="h-5 w-5 text-emerald-500" />}
+            />
+            <StatCard
+              title="Rejected Campaigns"
+              value={stats?.rejectedTickets}
+              icon={<XCircle className="h-5 w-5 text-rose-500" />}
+            />
+            <StatCard
+              title="Active Booking Queries"
+              value={stats?.requestedBookings}
+              icon={<CalendarCheck className="h-5 w-5 text-indigo-500" />}
+            />
+            <StatCard
+              title="Total Units Sold"
+              value={stats?.totalSold}
+              icon={<TrendingUp className="h-5 w-5 text-teal-500" />}
+            />
+            <StatCard
+              title="Gross Earnings"
+              value={`$${stats?.totalRevenue?.toLocaleString()}`}
+              icon={<DollarSign className="h-5 w-5 text-orange-500" />}
+              className="sm:col-span-2 lg:col-span-1 xl:col-span-2 border-orange-100 dark:border-orange-950/30"
+            />
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── SUB-COMPONENT: CARD CARRIER ── */
+function StatCard({ title, value, icon, className = "" }) {
+  return (
+    <div className={`group relative overflow-hidden rounded-2xl border border-stone-200/80 bg-white p-5 transition-all duration-200 hover:border-stone-300 dark:border-neutral-800/80 dark:bg-neutral-900 dark:hover:border-neutral-700 shadow-sm ${className}`}>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs font-medium text-stone-500 truncate dark:text-stone-400">
+          {title}
+        </span>
+        <div className="rounded-xl p-2 bg-stone-50 group-hover:scale-105 transition-transform dark:bg-neutral-800/50">
+          {icon}
         </div>
-      </section>
-
-      {/* ── Recent requested bookings ── */}
-      <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-stone-400 dark:text-stone-500">
-            Recent Booking Requests
-          </h2>
-          <Link
-            href="/dashboard/vendor/requested-bookings"
-            className="text-xs font-semibold text-orange-600 dark:text-orange-400 hover:underline"
-          >
-            View all →
-          </Link>
-        </div>
-
-        <div className="bg-white dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-2xl overflow-hidden shadow-sm">
-
-          {/* 💻 Desktop table */}
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-stone-200 dark:border-neutral-800 bg-stone-50 dark:bg-neutral-800/50">
-                  <th className="text-left font-semibold text-stone-500 dark:text-stone-400 px-5 py-3 whitespace-nowrap">User</th>
-                  <th className="text-left font-semibold text-stone-500 dark:text-stone-400 px-4 py-3 whitespace-nowrap">Ticket</th>
-                  <th className="text-center font-semibold text-stone-500 dark:text-stone-400 px-4 py-3 whitespace-nowrap">Qty</th>
-                  <th className="text-right font-semibold text-stone-500 dark:text-stone-400 px-4 py-3 whitespace-nowrap">Total</th>
-                  <th className="text-center font-semibold text-stone-500 dark:text-stone-400 px-5 py-3 whitespace-nowrap">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-stone-100 dark:divide-neutral-800">
-                {recentBookings.map((b) => (
-                  <tr
-                    key={b.id}
-                    className="hover:bg-stone-50 dark:hover:bg-neutral-800/40 transition-colors"
-                  >
-                    <td className="px-5 py-3 font-medium text-stone-900 dark:text-stone-50 whitespace-nowrap">
-                      {b.user}
-                    </td>
-                    {/* Fixed: Extracted text elements inside a layout-bounded block wrapper container */}
-                    <td className="px-4 py-3 max-w-[240px]">
-                      <div className="text-stone-500 dark:text-stone-400 truncate w-full" title={b.ticket}>
-                        {b.ticket}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-center text-stone-700 dark:text-stone-300 whitespace-nowrap">
-                      ×{b.qty}
-                    </td>
-                    <td className="px-4 py-3 text-right font-semibold text-stone-900 dark:text-stone-50 whitespace-nowrap">
-                      ৳{b.total.toLocaleString()}
-                    </td>
-                    <td className="px-5 py-3 text-center whitespace-nowrap">
-                      <span className={["inline-flex px-2.5 py-1 rounded-full text-xs font-semibold capitalize border", BOOKING_STATUS_STYLES[b.status]].join(" ")}>
-                        {b.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* 📱 Mobile cards */}
-          <div className="sm:hidden divide-y divide-stone-100 dark:divide-neutral-800">
-            {recentBookings.map((b) => (
-              <div key={b.id} className="p-4 flex flex-col gap-2">
-                <div className="flex items-center justify-between gap-4">
-                  <p className="font-semibold text-stone-900 dark:text-stone-50 text-sm truncate">{b.user}</p>
-                  <span className={["px-2.5 py-1 rounded-full text-[11px] font-semibold capitalize border shrink-0", BOOKING_STATUS_STYLES[b.status]].join(" ")}>
-                    {b.status}
-                  </span>
-                </div>
-                {/* Fixed: Applied bounding utilities to guarantee overflow isolation across small touchscreens */}
-                <p className="text-xs text-stone-500 dark:text-stone-400 truncate w-full" title={b.ticket}>
-                  {b.ticket}
-                </p>
-                <div className="flex items-center justify-between text-sm pt-0.5">
-                  <span className="text-stone-400 dark:text-stone-500">Qty: <span className="font-medium text-stone-700 dark:text-stone-300">×{b.qty}</span></span>
-                  <span className="font-bold text-stone-900 dark:text-stone-50">৳{b.total.toLocaleString()}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </section>
-
+      </div>
+      <div className="mt-2 flex items-baseline gap-1">
+        <span className="text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-50">
+          {value ?? 0}
+        </span>
+      </div>
     </div>
   );
 }

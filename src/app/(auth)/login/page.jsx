@@ -15,7 +15,8 @@ export default function Login() {
   
   const router = useRouter();
   if(data?.user){
-    router.push('/')
+    return router.push('/')
+   
     
   }
 

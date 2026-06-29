@@ -17,7 +17,7 @@ export default function SignUp() {
   
 const router = useRouter()
  if(data?.user){
-    router.push('/')
+     return router.push('/')
     
   }
   const [showPassword, setShowPassword] = useState(false);
