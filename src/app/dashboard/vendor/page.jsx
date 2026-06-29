@@ -97,7 +97,7 @@ export default function VendorDashboardOverview() {
           // Live Loaded Components
           <>
             <StatCard
-              title="Total Inventory Items"
+              title="Total Tickets"
               value={stats?.totalTickets}
               icon={<Ticket className="h-5 w-5 text-blue-500" />}
             />
